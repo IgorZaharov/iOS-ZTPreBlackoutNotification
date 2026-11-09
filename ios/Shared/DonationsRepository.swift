@@ -6,8 +6,8 @@ public final class DonationsRepository {
     public static let REFRESH_INTERVAL_MS: Int64 = 86_400_000
 
     public static let DEFAULT_DONATIONS: [DonationItem] = [
-        DonationItem(title: "Допомога тваринам", url: "https://send.monobank.ua/jar/7vJA5xrLoV"),
-        DonationItem(title: "Фонд Повернись Живим", url: "https://savelife.in.ua/donate/")
+        DonationItem(title: "Допомога тваринам | Help animal volunteers", url: "https://send.monobank.ua/jar/7vJA5xrLoV"),
+        DonationItem(title: "Фонд Повернись Живим | Come Back Alive Foundation", url: "https://savelife.in.ua/donate/")
     ]
 
     private var defaults: UserDefaults {

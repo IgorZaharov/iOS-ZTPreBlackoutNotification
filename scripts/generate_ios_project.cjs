@@ -26,6 +26,16 @@ const filesToExpose = [
     description: 'GitHub Actions macOS 14 CI/CD workflow: runs npm test, generates Xcode project, and builds unsigned & signed .ipa'
   },
   {
+    path: 'README.md',
+    language: 'markdown',
+    description: 'iOS 17.0+ Repository README (Swift 5.10, SwiftUI, WidgetKit, AppIntents, XcodeGen)'
+  },
+  {
+    path: 'PRIVACY_POLICY.md',
+    language: 'markdown',
+    description: 'Official Privacy Policy compliant with Apple App Store Review Guidelines 5.1, PrivacyInfo.xcprivacy (CA92.1), and GDPR'
+  },
+  {
     path: 'ios/Shared/KyivZone.swift',
     language: 'swift',
     description: 'Europe/Kyiv to Europe/Kiev timezone fallback and Kyiv calendar utilities'
@@ -157,7 +167,7 @@ export const IOS_PROJECT_FILES: IosProjectFile[] = ${JSON.stringify(entries, nul
 fs.writeFileSync(path.join(rootDir, 'src/data/iosProjectFiles.ts'), tsOutput, 'utf-8');
 console.log('Generated src/data/iosProjectFiles.ts with', entries.length, 'files.');
 
-execSync('python3 -m zipfile -c public/iOS-ZTPreBlackoutNotification.zip ios .github/workflows/build-ipa.yml IOS_HANDOVER.md', {
+execSync('python3 -m zipfile -c public/iOS-ZTPreBlackoutNotification.zip ios .github/workflows/build-ipa.yml README.md PRIVACY_POLICY.md donations.json IOS_HANDOVER.md', {
   cwd: rootDir,
   stdio: 'inherit'
 });

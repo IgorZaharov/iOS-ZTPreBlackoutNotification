@@ -275,9 +275,9 @@ function runUnitTestB() {
   assert.ok(fs.existsSync(donationsJsonPath), 'Missing /donations.json in repository root');
   const donationsList = JSON.parse(fs.readFileSync(donationsJsonPath, 'utf-8'));
   assert.equal(donationsList.length, 2, '/donations.json must have the 2 default charity links');
-  assert.equal(donationsList[0].title, 'Допомога тваринам');
+  assert.equal(donationsList[0].title, 'Допомога тваринам | Help animal volunteers');
   assert.equal(donationsList[0].url, 'https://send.monobank.ua/jar/7vJA5xrLoV');
-  assert.equal(donationsList[1].title, 'Фонд Повернись Живим');
+  assert.equal(donationsList[1].title, 'Фонд Повернись Живим | Come Back Alive Foundation');
   assert.equal(donationsList[1].url, 'https://savelife.in.ua/donate/');
   assert.equal(DONATIONS_REFRESH_INTERVAL_MS, 24 * 60 * 60 * 1000, 'Donations must re-read 1 time per day (24h)');
   assert.deepEqual(DEFAULT_DONATIONS, donationsList);
@@ -486,21 +486,21 @@ function runUnitTestB() {
     // Git not initialized or not in a git worktree
   }
 
-  // 13. Verify Official Privacy Policy (Google Play & GDPR compliant)
+  // 13. Verify Official Privacy Policy (Apple App Store & GDPR compliant)
   const privacyMdPath = path.join(ROOT_DIR, 'PRIVACY_POLICY.md');
   assert.ok(fs.existsSync(privacyMdPath), 'PRIVACY_POLICY.md must exist in repository root');
   const privacyMd = fs.readFileSync(privacyMdPath, 'utf-8');
   assert.ok(privacyMd.length > 1000, 'PRIVACY_POLICY.md must be comprehensive and official');
-  assert.ok(privacyMd.includes('com.ZTBlackoutPreWarning'), 'Privacy Policy must include package name com.ZTBlackoutPreWarning');
+  assert.ok(privacyMd.includes('ua.blackout.prewarning'), 'Privacy Policy must include Bundle ID ua.blackout.prewarning');
   assert.ok(privacyMd.includes('Igor Zaharov'), 'Privacy Policy must include developer name Igor Zaharov');
-  assert.ok(privacyMd.includes('android.permission.INTERNET'), 'Privacy Policy must document INTERNET permission');
-  assert.ok(privacyMd.includes('android.permission.POST_NOTIFICATIONS'), 'Privacy Policy must document POST_NOTIFICATIONS permission');
-  assert.ok(privacyMd.includes('SCHEDULE_EXACT_ALARM'), 'Privacy Policy must document SCHEDULE_EXACT_ALARM permission');
-  assert.ok(privacyMd.includes('RECEIVE_BOOT_COMPLETED'), 'Privacy Policy must document RECEIVE_BOOT_COMPLETED permission');
+  assert.ok(privacyMd.includes('UNUserNotificationCenter'), 'Privacy Policy must document UNUserNotificationCenter');
+  assert.ok(privacyMd.includes('BGTaskScheduler'), 'Privacy Policy must document BGTaskScheduler');
+  assert.ok(privacyMd.includes('PrivacyInfo.xcprivacy'), 'Privacy Policy must document PrivacyInfo.xcprivacy');
+  assert.ok(privacyMd.includes('CA92.1'), 'Privacy Policy must document Apple Required Reason API code CA92.1');
   assert.ok(privacyMd.includes('Політика конфіденційності'), 'Privacy Policy must include Ukrainian section');
   assert.ok(privacyMd.includes('2297-VI') || privacyMd.includes('GDPR'), 'Privacy Policy must cite relevant data protection laws');
   const publicPrivacyHtml = path.join(ROOT_DIR, 'public/privacy.html');
-  assert.ok(fs.existsSync(publicPrivacyHtml), 'public/privacy.html must exist for Google Play Console URL hosting');
+  assert.ok(fs.existsSync(publicPrivacyHtml), 'public/privacy.html must exist for App Store Connect URL hosting');
 
   console.log('Unit Test B PASSED: All UI elements, icons, labels, defaults, changelog, and official Privacy Policy checks succeeded.');
 }
@@ -2334,6 +2334,10 @@ function runUnitTestD_iOSParity() {
   const donationsRepoSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/DonationsRepository.swift'), 'utf-8');
   const indexHtml = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf-8');
   const metadataJson = fs.readFileSync(path.join(ROOT_DIR, 'metadata.json'), 'utf-8');
+  const readmeMd = fs.readFileSync(path.join(ROOT_DIR, 'README.md'), 'utf-8');
+  const privacyPolicyMd = fs.readFileSync(path.join(ROOT_DIR, 'PRIVACY_POLICY.md'), 'utf-8');
+  const publicPrivacyPolicyMd = fs.readFileSync(path.join(ROOT_DIR, 'public/PRIVACY_POLICY.md'), 'utf-8');
+  const publicPrivacyHtmlDoc = fs.readFileSync(path.join(ROOT_DIR, 'public/privacy.html'), 'utf-8');
 
   assert.ok(
     !aboutViewTsx.includes('Google') &&
@@ -2362,8 +2366,19 @@ function runUnitTestD_iOSParity() {
       !appStoreGuideTsx.includes('Google Play') &&
       !appStoreGuideTsx.includes('Android') &&
       !indexHtml.includes('Android') &&
-      !metadataJson.includes('Android'),
-    'iOS and Web codebase must not contain any Android, Google, Play Store, Kotlin, Glance, or APK mentions'
+      !metadataJson.includes('Android') &&
+      !readmeMd.includes('Android') &&
+      !readmeMd.includes('Google') &&
+      readmeMd.includes('WidgetKit') &&
+      readmeMd.includes('SwiftUI') &&
+      !privacyPolicyMd.includes('Android') &&
+      !privacyPolicyMd.includes('Google') &&
+      privacyPolicyMd.includes('Apple App Store Review Guidelines') &&
+      !publicPrivacyPolicyMd.includes('Android') &&
+      !publicPrivacyPolicyMd.includes('Google') &&
+      !publicPrivacyHtmlDoc.includes('Android') &&
+      !publicPrivacyHtmlDoc.includes('Google'),
+    'iOS, Web codebase, README.md, and PRIVACY_POLICY.md must not contain any Android, Google, Play Store, Kotlin, Glance, or APK mentions'
   );
 
   assert.ok(

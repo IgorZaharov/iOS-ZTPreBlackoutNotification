@@ -15,11 +15,11 @@ const STORAGE_TS_KEY = 'zt_donations_last_fetch_ms_v1';
 
 export const DEFAULT_DONATIONS: DonationLink[] = [
   {
-    title: 'Допомога тваринам',
+    title: 'Допомога тваринам | Help animal volunteers',
     url: 'https://send.monobank.ua/jar/7vJA5xrLoV',
   },
   {
-    title: 'Фонд Повернись Живим',
+    title: 'Фонд Повернись Живим | Come Back Alive Foundation',
     url: 'https://savelife.in.ua/donate/',
   },
 ];

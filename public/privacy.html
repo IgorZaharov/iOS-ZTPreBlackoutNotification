@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Політика конфіденційності | Privacy Policy - Світло в Житомирі (com.ZTBlackoutPreWarning)</title>
+  <title>Політика конфіденційності | Privacy Policy - Світло в Житомирі (ua.blackout.prewarning)</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -16,7 +16,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       line-height: 1.6;
@@ -103,120 +103,112 @@
       <h1>Privacy Policy / Політика конфіденційності</h1>
 
       <div class="meta-box">
-        <p><strong>Application Name / Назва додатку:</strong> Світло в Житомирі (ZTBlackoutPreWarning)</p>
-        <p><strong>Package Name / Application ID:</strong> <code>com.ZTBlackoutPreWarning</code></p>
+        <p><strong>Application Name / Назва застосунку:</strong> Світло в Житомирі (iOS-ZTPreBlackoutNotification)</p>
+        <p><strong>Bundle Identifier / Application ID:</strong> <code>ua.blackout.prewarning</code></p>
         <p><strong>Developer / Publisher:</strong> Igor Zaharov</p>
         <p><strong>Effective Date / Дата набрання чинності:</strong> November 9, 2026</p>
-        <p><strong>Open-Source Repository:</strong> <a href="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning" target="_blank" rel="noopener noreferrer">https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning</a></p>
+        <p><strong>Open-Source Repository:</strong> <a href="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification" target="_blank" rel="noopener noreferrer">https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification</a></p>
       </div>
 
       <h2>1. Introduction and Scope</h2>
-      <p>This Privacy Policy governs the mobile application <strong>"Світло в Житомирі"</strong> (package name <code>com.ZTBlackoutPreWarning</code>), created and maintained by Igor Zaharov as a free, open-source utility.</p>
+      <p>This Privacy Policy governs the native iOS mobile application <strong>"Світло в Житомирі"</strong> (Bundle Identifier <code>ua.blackout.prewarning</code>), created and maintained by Igor Zaharov as a free, open-source utility for iPhone (<code>iOS 17.0+</code>).</p>
       <p>The Application is designed to provide residents and organizations in the Zhytomyr region of Ukraine with timely, accurate information regarding scheduled electrical power outages published by <strong>JSC "Zhytomyroblenergo" (АТ «Житомиробленерго»)</strong>.</p>
-      <p>We are strictly committed to user privacy. This document outlines our data handling practices in accordance with the <strong>Google Play Developer Program Policies</strong>, the <strong>General Data Protection Regulation (GDPR) (EU) 2016/679</strong>, and the <strong>Law of Ukraine "On Protection of Personal Data" (Закон України «Про захист персональних даних» № 2297-VI)</strong>.</p>
+      <p>We are strictly committed to user privacy. This document outlines our data handling practices in accordance with the <strong>Apple App Store Review Guidelines (Section 5.1 Privacy)</strong>, <strong>Apple Privacy Manifest Requirements (<code>PrivacyInfo.xcprivacy</code>)</strong>, the <strong>General Data Protection Regulation (GDPR) (EU) 2016/679</strong>, and the <strong>Law of Ukraine "On Protection of Personal Data" (Закон України «Про захист персональних даних» № 2297-VI)</strong>.</p>
 
       <h2>2. Principle of Zero Data Collection (Data Minimization)</h2>
       <ul>
-        <li><strong>No Personal Data Collected:</strong> The Application does not collect, solicit, aggregate, record, store, sell, lease, or monetize any Personally Identifiable Information (PII).</li>
+        <li><strong>No Personal Data Collected (<code>NSPrivacyCollectedDataTypes = []</code>):</strong> The Application does not collect, solicit, aggregate, record, store, sell, lease, or monetize any Personally Identifiable Information (PII).</li>
         <li><strong>No User Accounts:</strong> There is no registration, login, profile creation, or authentication required to use the Application.</li>
-        <li><strong>No Advertising or Behavioral Profiling:</strong> The Application contains no advertising frameworks, ad-tracking SDKs, or commercial behavioral profiling mechanisms. It does not access the Android Advertising ID (AAID).</li>
-        <li><strong>No Analytics or Telemetry:</strong> The Application does not integrate third-party analytics services (e.g., Google Analytics, Firebase SDK, AppsFlyer, Facebook SDK). We do not collect telemetry, diagnostic crash reports containing device IDs, or usage statistics.</li>
-        <li><strong>No Location Tracking:</strong> The Application does not request or access GPS, coarse location, Wi-Fi SSID information, or cellular network data.</li>
+        <li><strong>No Advertising or Tracking (<code>NSPrivacyTracking = false</code>):</strong> The Application contains no advertising frameworks, ad-tracking SDKs, or behavioral profiling mechanisms. It does not access the Apple Identifier for Advertisers (<code>IDFA</code>).</li>
+        <li><strong>No Analytics or Telemetry:</strong> The Application does not integrate third-party analytics services. We do not collect telemetry, diagnostic crash reports containing device IDs, or usage statistics.</li>
+        <li><strong>No Location Tracking:</strong> The Application does not request or access <code>CoreLocation</code> (GPS), Wi-Fi SSID information, or cellular network data.</li>
       </ul>
 
-      <h2>3. Information Processed Locally on the User's Device</h2>
-      <p>All configuration settings and operational data created during application use are retained <strong>strictly on the user's physical device</strong> within the sandboxed Android application private storage (<code>SharedPreferences</code> under <code>Context.MODE_PRIVATE</code>). This information is never transmitted to any external server or third party.</p>
+      <h2>3. Information Processed Locally on the User's Device (<code>PrivacyInfo.xcprivacy</code>)</h2>
+      <p>All configuration settings and operational data created during application use are retained <strong>strictly on the user's physical iPhone</strong> within the sandboxed iOS application storage and shared App Group (<code>UserDefaults</code> under <code>group.ua.blackout.prewarning</code>, declared with Apple Required Reason API code <code>CA92.1</code>). This information is never transmitted to any external server or third party.</p>
       <ul>
-        <li><strong>Selected Power Outage Queue:</strong> The user's chosen consumer sub-queue (e.g., queues 1.1 through 6.2).</li>
-        <li><strong>Notification & Pre-Warning Settings:</strong> The user's chosen pre-warning lead time (e.g., 15 or 30 minutes in advance), sound toggles, and vibration toggles.</li>
-        <li><strong>Audio Preferences:</strong> Sound effects and music volume sliders.</li>
-        <li><strong>Offline Cache:</strong> Cached electricity outage schedule tables to enable offline viewing when network access is unavailable.</li>
+        <li><strong>Selected Power Outage Queue:</strong> The user's chosen consumer sub-queue (queues 1.1 through 6.2).</li>
+        <li><strong>Notification & Pre-Warning Settings:</strong> The user's chosen pre-warning lead time (15 or 30 minutes in advance), sound toggles, and haptic toggles.</li>
+        <li><strong>Audio Preferences:</strong> Sound effects and music toggles.</li>
+        <li><strong>WidgetKit Cache:</strong> Cached electricity outage schedule tables shared with <code>BlackoutWidgetExtension</code>.</li>
         <li><strong>Mini-Game State ("Житомирська Рулетка"):</strong> Local game scores, achievements, daily streak counters, and mini-game power points.</li>
       </ul>
 
       <h2>4. Network Connections and Data Sources</h2>
-      <p>The Application requires internet access exclusively to fetch publicly accessible data necessary for its primary utility function:</p>
+      <p>The Application requires internet access via <code>URLSession</code> HTTPS exclusively to fetch publicly accessible data necessary for its primary utility function:</p>
       <ul>
         <li><strong>JSC "Zhytomyroblenergo" Schedule Server:</strong> (<code>https://www.ztoe.com.ua/unhooking-search.php</code>) &mdash; Retrieving publicly published hourly power outage schedule HTML tables. No user credentials, cookies, device identifiers, or personal parameters are sent.</li>
-        <li><strong>Static Configuration File (GitHub Raw):</strong> (<code>https://raw.githubusercontent.com/IgorZaharov/Android-ZTBlackoutPreWarning/main/donations.json</code>) &mdash; Periodically retrieving optional community donation URLs and official information links using standard conditional HTTP headers (<code>ETag</code> / <code>If-Modified-Since</code>).</li>
+        <li><strong>Static Configuration File (GitHub Raw):</strong> (<code>https://raw.githubusercontent.com/IgorZaharov/iOS-ZTPreBlackoutNotification/main/ios/Resources/donations.json</code>) &mdash; Periodically retrieving optional community charity URLs using standard conditional HTTP headers (<code>ETag</code> / <code>If-None-Match</code>).</li>
       </ul>
 
-      <h2>5. Android Device Permissions and Technical Justification</h2>
+      <h2>5. iOS Capabilities, Frameworks, and Technical Justification</h2>
       <table>
         <thead>
           <tr>
-            <th>Permission</th>
+            <th>iOS Capability / Framework</th>
             <th>Technical Requirement & Justification</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><code>android.permission.INTERNET</code></td>
+            <td><code>URLSession</code> (HTTPS)</td>
             <td>Required to communicate via HTTPS with the public servers of JSC "Zhytomyroblenergo" and retrieve blackout schedules.</td>
           </tr>
           <tr>
-            <td><code>android.permission.ACCESS_NETWORK_STATE</code></td>
-            <td>Required to verify whether an active Wi-Fi or cellular network connection is available prior to initiating network queries.</td>
+            <td><code>UNUserNotificationCenter</code></td>
+            <td>Required to schedule exact local calendar notifications (<code>UNCalendarNotificationTrigger</code>) warning the user of imminent electrical outages according to their configured preference.</td>
           </tr>
           <tr>
-            <td><code>android.permission.POST_NOTIFICATIONS</code></td>
-            <td>Required on Android 13+ (API 33+) to present local notifications warning the user of imminent electrical outages according to their configured preference.</td>
+            <td><code>BGTaskScheduler</code> (<code>ua.blackout.prewarning.sync</code>)</td>
+            <td>Required to periodically refresh blackout schedules in the background and update Home Screen <code>WidgetKit</code> timelines.</td>
           </tr>
           <tr>
-            <td><code>android.permission.SCHEDULE_EXACT_ALARM</code><br/><code>android.permission.USE_EXACT_ALARM</code></td>
-            <td>Required to schedule exact, time-critical local alarms using Android <code>AlarmManager</code> so pre-warnings trigger at the precise minute chosen by the user even in Doze mode.</td>
+            <td><code>App Groups</code> (<code>group.ua.blackout.prewarning</code>)</td>
+            <td>Required to synchronize schedule data between the main iOS application and the Home Screen <code>WidgetKit</code> extension.</td>
           </tr>
           <tr>
-            <td><code>android.permission.RECEIVE_BOOT_COMPLETED</code></td>
-            <td>Required to automatically restore and reschedule the user's configured local outage warning alarms following a device reboot or system time adjustment.</td>
-          </tr>
-          <tr>
-            <td><code>android.permission.VIBRATE</code></td>
-            <td>Required to deliver haptic vibration feedback alongside notifications if enabled in the user's settings.</td>
-          </tr>
-          <tr>
-            <td><code>android.permission.WAKE_LOCK</code></td>
-            <td>Required momentarily during exact alarm broadcasts to guarantee that the notification dispatch routine completes successfully before the device returns to sleep.</td>
+            <td><code>NSPhotoLibraryAddUsageDescription</code></td>
+            <td>Requested only when the user explicitly chooses to save a score card image to the iOS Photo Library.</td>
           </tr>
         </tbody>
       </table>
 
       <h2>6. Third-Party Links and External Services</h2>
-      <p>The Application contains hyperlinks to external third-party platforms (e.g., JSC "Zhytomyroblenergo" website, official Facebook page, Monobank voluntary donation jar, and GitHub repository). We do not control or assume responsibility for external privacy practices.</p>
+      <p>The Application contains hyperlinks to external third-party platforms (JSC "Zhytomyroblenergo" website, official Facebook page, voluntary charity links opened externally in Safari per Apple Guideline 3.2.1(vi), and GitHub repository). We do not control or assume responsibility for external privacy practices.</p>
 
       <h2>7. Children's Privacy (COPPA & GDPR Compliance)</h2>
-      <p>The Application does not target, knowingly interact with, or collect information from children under the age of 13 (or under 16 within the European Economic Area). Because the Application collects no personal data whatsoever, it is fully compliant with COPPA and Google Play Families Policy.</p>
+      <p>The Application does not target, knowingly interact with, or collect information from children under the age of 13 (or under 16 within the European Economic Area). Because the Application collects no personal data whatsoever, it is fully compliant with COPPA and Apple App Store Review Guidelines Section 1.3.</p>
 
       <h2>8. Data Storage, Security, and Retention</h2>
-      <p>All settings are stored exclusively in the private sandboxed storage on the user's device. Users retain 100% control over their data and can clear all data at any time via Android Settings (<strong>Settings &gt; Apps &gt; Світло в Житомирі &gt; Storage &gt; Clear Data</strong>) or by uninstalling the Application.</p>
+      <p>All settings are stored exclusively in the private sandboxed storage on the user's iPhone. Users retain 100% control over their data and can clear all data at any time via the in-app Reset button or via iOS Settings (<strong>Settings &gt; General &gt; iPhone Storage &gt; Світло в Житомирі &gt; Delete App</strong>).</p>
 
       <h2>9. Contact Information</h2>
       <p>If you have questions or legal inquiries concerning this Privacy Policy, please contact the developer through our public issue tracker:</p>
       <ul>
         <li><strong>Lead Developer:</strong> Igor Zaharov</li>
-        <li><strong>GitHub Issues:</strong> <a href="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues" target="_blank" rel="noopener noreferrer">https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues</a></li>
-        <li><strong>Repository:</strong> <a href="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning" target="_blank" rel="noopener noreferrer">https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning</a></li>
+        <li><strong>GitHub Issues:</strong> <a href="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues" target="_blank" rel="noopener noreferrer">https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues</a></li>
+        <li><strong>Repository:</strong> <a href="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification" target="_blank" rel="noopener noreferrer">https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification</a></li>
       </ul>
 
       <hr />
 
       <h1>Політика конфіденційності (Українська версія)</h1>
       <p><strong>Дата набрання чинності:</strong> 9 листопада 2026 року<br />
-      <strong>Назва додатку:</strong> Світло в Житомирі (ZTBlackoutPreWarning)<br />
-      <strong>Ідентифікатор пакета (Package Name):</strong> <code>com.ZTBlackoutPreWarning</code><br />
+      <strong>Назва застосунку:</strong> Світло в Житомирі (iOS-ZTPreBlackoutNotification)<br />
+      <strong>Ідентифікатор бандла (Bundle ID):</strong> <code>ua.blackout.prewarning</code><br />
       <strong>Розробник:</strong> Ігор Захаров (Igor Zaharov)</p>
 
       <h3>1. Загальні положення та відсутність збору даних</h3>
-      <p>Ця Політика регулює використання додатку «Світло в Житомирі». Додаток <strong>не збирає</strong>, не реєструє, не передає та не продає персональні дані користувачів. Реєстрація відсутня. Трекінгові або рекламні модулі відсутні.</p>
+      <p>Ця Політика регулює використання нативного iOS-застосунку «Світло в Житомирі». Застосунок <strong>не збирає</strong>, не реєструє, не передає та не продає персональні дані користувачів (<code>NSPrivacyCollectedDataTypes = []</code>, <code>NSPrivacyTracking = false</code>). Реєстрація відсутня. Трекінгові або рекламні модулі відсутні.</p>
 
-      <h3>2. Локальне збереження</h3>
-      <p>Усі налаштування (номер черги, час нагадування, налаштування звуку) зберігаються <strong>виключно на вашому телефоні</strong> (у SharedPreferences) і нікуди не передаються.</p>
+      <h3>2. Локальне збереження (<code>PrivacyInfo.xcprivacy</code>)</h3>
+      <p>Усі налаштування (номер черги, час нагадування, налаштування звуку) зберігаються <strong>виключно на вашому iPhone</strong> (у <code>UserDefaults</code> контейнера <code>group.ua.blackout.prewarning</code>, код декларації Apple <code>CA92.1</code>) і нікуди не передаються.</p>
 
-      <h3>3. Дозволи Android</h3>
-      <p>Дозволи використовуються виключно для технічного функціонування (завантаження графіка з сайту ztoe.com.ua, надсилання локальних сповіщень та точний таймер попередження).</p>
+      <h3>3. Системні дозволи iOS</h3>
+      <p>Дозволи iOS (<code>UNUserNotificationCenter</code>, <code>BGTaskScheduler</code>, <code>NSPhotoLibraryAddUsageDescription</code>) використовуються виключно для технічного функціонування (завантаження графіка з сайту ztoe.com.ua, надсилання локальних сповіщень, оновлення віджетів <code>WidgetKit</code> та збереження картки результату за запитом користувача).</p>
 
       <h3>4. Видалення даних</h3>
-      <p>Користувач може будь-коли стерти всі налаштування через «Налаштування &gt; Програми &gt; Світло в Житомирі &gt; Очистити дані» або просто видаливши додаток.</p>
+      <p>Користувач може будь-коли стерти всі налаштування кнопкою скидання в налаштуваннях застосунку або видаливши додаток через «Налаштування iOS &gt; Основні &gt; Сховище iPhone &gt; Світло в Житомирі &gt; Видалити додаток».</p>
     </div>
   </div>
 </body>
