@@ -57,6 +57,7 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
   const t = translations[lang];
   const [isRouletteOpen, setIsRouletteOpen] = React.useState(false);
   const [imitatedNotification, setImitatedNotification] = React.useState<NotificationRecord | null>(null);
+  const [autoOpenQueueHelp, setAutoOpenQueueHelp] = React.useState(false);
 
   React.useEffect(() => {
     if (schedule?.queue && schedule?.slots?.length) {
@@ -69,6 +70,18 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
       setIsRouletteOpen(false);
     }
   }, [activeTab]);
+
+  React.useEffect(() => {
+    const handleFirstLaunchReset = () => {
+      setIsRouletteOpen(false);
+      setImitatedNotification(null);
+      setAutoOpenQueueHelp(false);
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('zt-app-first-launch-reset', handleFirstLaunchReset);
+      return () => window.removeEventListener('zt-app-first-launch-reset', handleFirstLaunchReset);
+    }
+  }, []);
 
   const currentTimeStr = React.useMemo(() => {
     const h = now.getHours().toString().padStart(2, '0');
@@ -186,7 +199,14 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
         {/* Scrollable View Area */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth px-4 pt-2 pb-28 relative z-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className={`flex-1 min-h-0 ${
+            (!settings.queue || settings.queue.trim() === '') &&
+            !settings.customQueueStatusText &&
+            !settings.activeEmergencyOutage &&
+            activeTab === 'schedule'
+              ? 'overflow-hidden'
+              : 'overflow-y-auto overscroll-contain scroll-smooth'
+          } px-4 pt-2 pb-28 relative z-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
         >
           {activeTab === 'schedule' && (
             <MainView
@@ -199,12 +219,24 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
               onRefresh={onRefresh}
               isRefreshing={isRefreshing}
               onSendTestAlert={onSendTestAlert}
+              onOpenQueueSelection={() => {
+                setAutoOpenQueueHelp(true);
+                setActiveTab('settings');
+              }}
+              onChangeLanguage={(newLang) =>
+                onUpdateSettings({
+                  ...settings,
+                  language: newLang
+                })
+              }
             />
           )}
 
           {activeTab === 'widget' && (
             <WidgetSimulator
               schedule={schedule}
+              tomorrowSchedule={tomorrowSchedule}
+              now={now}
               settings={settings}
               lang={lang}
               onToggleNotifications={onToggleNotifications}
@@ -218,10 +250,25 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
             <SettingsView
               settings={settings}
               lang={lang}
-              onUpdateSettings={onUpdateSettings}
+              onUpdateSettings={(newSettings) => {
+                const wasUnselected =
+                  (!settings.queue || settings.queue.trim() === '') &&
+                  !settings.customQueueStatusText &&
+                  !settings.selectedAddress;
+                const isNowSelected =
+                  Boolean(newSettings.queue && newSettings.queue.trim() !== '') ||
+                  Boolean(newSettings.customQueueStatusText) ||
+                  Boolean(newSettings.selectedAddress);
+                onUpdateSettings(newSettings);
+                if (wasUnselected && isNowSelected) {
+                  setActiveTab('schedule');
+                }
+              }}
               onSendTestAlert={onSendTestAlert}
               onForceRefresh={onRefresh}
               onResetDefaults={onResetDefaults}
+              autoOpenQueueHelp={autoOpenQueueHelp}
+              onQueueHelpOpened={() => setAutoOpenQueueHelp(false)}
             />
           )}
 
@@ -246,12 +293,28 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
 
         {/* Floating Capsule Bottom Navigation Dock in Frosted Glass (hidden while Zhytomyr Roulette is open) */}
         {!isRouletteOpen && (
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-40 w-[84%] max-w-[320px]">
+          <div
+            data-testid="bottom-nav-dock"
+            className={`absolute bottom-5 left-1/2 -translate-x-1/2 z-40 w-[84%] max-w-[320px] transition-all duration-300 ${
+              (!settings.queue || settings.queue.trim() === '') &&
+              !settings.customQueueStatusText &&
+              !settings.activeEmergencyOutage &&
+              activeTab === 'schedule'
+                ? 'opacity-15 brightness-50 pointer-events-none select-none'
+                : ''
+            }`}
+          >
             <div className="bg-[#141A29]/80 backdrop-blur-2xl rounded-full p-1.5 border border-white/20 shadow-2xl flex items-center justify-around">
               
               {/* 1. Schedule */}
               <button
                 onClick={() => setActiveTab('schedule')}
+                disabled={
+                  (!settings.queue || settings.queue.trim() === '') &&
+                  !settings.customQueueStatusText &&
+                  !settings.activeEmergencyOutage &&
+                  activeTab === 'schedule'
+                }
                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                   activeTab === 'schedule'
                     ? 'bg-white text-black shadow-lg scale-105'
@@ -265,6 +328,12 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
               {/* 2. Widget Preview */}
               <button
                 onClick={() => setActiveTab('widget')}
+                disabled={
+                  (!settings.queue || settings.queue.trim() === '') &&
+                  !settings.customQueueStatusText &&
+                  !settings.activeEmergencyOutage &&
+                  activeTab === 'schedule'
+                }
                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                   activeTab === 'widget'
                     ? 'bg-white text-black shadow-lg scale-105'
@@ -278,6 +347,12 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
               {/* 3. Settings */}
               <button
                 onClick={() => setActiveTab('settings')}
+                disabled={
+                  (!settings.queue || settings.queue.trim() === '') &&
+                  !settings.customQueueStatusText &&
+                  !settings.activeEmergencyOutage &&
+                  activeTab === 'schedule'
+                }
                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                   activeTab === 'settings'
                     ? 'bg-white text-black shadow-lg scale-105'
@@ -291,6 +366,12 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
               {/* 4. About */}
               <button
                 onClick={() => setActiveTab('about')}
+                disabled={
+                  (!settings.queue || settings.queue.trim() === '') &&
+                  !settings.customQueueStatusText &&
+                  !settings.activeEmergencyOutage &&
+                  activeTab === 'schedule'
+                }
                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                   activeTab === 'about'
                     ? 'bg-white text-black shadow-lg scale-105'

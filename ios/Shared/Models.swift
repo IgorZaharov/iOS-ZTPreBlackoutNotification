@@ -12,13 +12,15 @@ public struct BlackoutSlot: Codable, Equatable, Identifiable {
     public let endMinute: Int
     public let label: String
     public let status: SlotStatus
+    public let isEmergency: Bool
 
-    public init(index: Int, startMinute: Int, endMinute: Int, label: String, status: SlotStatus) {
+    public init(index: Int, startMinute: Int, endMinute: Int, label: String, status: SlotStatus, isEmergency: Bool = false) {
         self.index = index
         self.startMinute = startMinute
         self.endMinute = endMinute
         self.label = label
         self.status = status
+        self.isEmergency = isEmergency
     }
 }
 
@@ -29,19 +31,22 @@ public struct DetailedInterval: Codable, Equatable, Identifiable {
     public let startMinuteOfDay: Int
     public let endMinuteOfDay: Int
     public let durationHours: Double
+    public let isEmergency: Bool
 
     public init(
         startStr: String,
         endStr: String,
         startMinuteOfDay: Int,
         endMinuteOfDay: Int,
-        durationHours: Double
+        durationHours: Double,
+        isEmergency: Bool = false
     ) {
         self.startStr = startStr
         self.endStr = endStr
         self.startMinuteOfDay = startMinuteOfDay
         self.endMinuteOfDay = endMinuteOfDay
         self.durationHours = durationHours
+        self.isEmergency = isEmergency
     }
 }
 
@@ -82,6 +87,14 @@ public struct FullScheduleResult: Equatable {
 
 public struct UserSettings: Codable, Equatable {
     public var queue: String
+    public var customQueueStatusText: String?
+    public var selectedAddress: String?
+    public var selectedRem: String?
+    public var selectedSettlement: String?
+    public var selectedStreet: String?
+    public var selectedHouse: String?
+    public var activeEmergencyOutageStart: String?
+    public var activeEmergencyOutageRestore: String?
     public var url: String
     public var advanceNoticeMinutes: Int
     public var refreshIntervalMinutes: Int
@@ -92,7 +105,15 @@ public struct UserSettings: Codable, Equatable {
     public var theme: String
 
     public init(
-        queue: String = "1.1",
+        queue: String = "",
+        customQueueStatusText: String? = nil,
+        selectedAddress: String? = nil,
+        selectedRem: String? = nil,
+        selectedSettlement: String? = nil,
+        selectedStreet: String? = nil,
+        selectedHouse: String? = nil,
+        activeEmergencyOutageStart: String? = nil,
+        activeEmergencyOutageRestore: String? = nil,
         url: String = "https://www.ztoe.com.ua/unhooking-search.php",
         advanceNoticeMinutes: Int = 15,
         refreshIntervalMinutes: Int = 30,
@@ -103,6 +124,14 @@ public struct UserSettings: Codable, Equatable {
         theme: String = "system"
     ) {
         self.queue = queue
+        self.customQueueStatusText = customQueueStatusText
+        self.selectedAddress = selectedAddress
+        self.selectedRem = selectedRem
+        self.selectedSettlement = selectedSettlement
+        self.selectedStreet = selectedStreet
+        self.selectedHouse = selectedHouse
+        self.activeEmergencyOutageStart = activeEmergencyOutageStart
+        self.activeEmergencyOutageRestore = activeEmergencyOutageRestore
         self.url = url
         self.advanceNoticeMinutes = advanceNoticeMinutes
         self.refreshIntervalMinutes = refreshIntervalMinutes

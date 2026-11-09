@@ -150,7 +150,7 @@ export const translations = {
     errorNoQueuesFound: 'No queues found on site',
     refreshSuccessToast: 'Site reachable, schedule updated',
     emergencyOutagesLabel: 'Emergency outages info:',
-    siteSchedulesLabel: 'Графіки відключень на сайті',
+    siteSchedulesLabel: 'Blackout schedules on website',
 
     // Navigation
     navSchedule: 'Schedule',

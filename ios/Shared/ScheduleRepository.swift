@@ -81,6 +81,8 @@ public final class ScheduleRepository {
         }
     }
 
+    public static let MAX_INTERVAL_CACHE_ENTRIES = 64
+
     public func getTodaySlots(queue: String, now: Date = Date()) -> [BlackoutSlot] {
         if isScheduleUnclear() {
             return []
@@ -102,6 +104,21 @@ public final class ScheduleRepository {
                 lock.unlock()
                 return parsed
             }
+        } else if defaults.string(forKey: "cache_tomorrow_date_\(queue)") == todayStr,
+                  defaults.bool(forKey: "has_tomorrow_\(queue)"),
+                  let promotedRaw = defaults.string(forKey: "tomorrow_slots_\(queue)") {
+            // Midnight rollover: promote cached tomorrow schedule for this date into today's schedule
+            let promoted = deserializeSlots(promotedRaw)
+            defaults.set(promotedRaw, forKey: "today_slots_\(queue)")
+            defaults.set(todayStr, forKey: "cache_today_date_\(queue)")
+            defaults.removeObject(forKey: "tomorrow_slots_\(queue)")
+            defaults.removeObject(forKey: "cache_tomorrow_date_\(queue)")
+            defaults.set(false, forKey: "has_tomorrow_\(queue)")
+            lock.lock()
+            todayMemoryCache[queue] = promoted
+            tomorrowMemoryCache.removeValue(forKey: queue)
+            lock.unlock()
+            return promoted
         }
         return []
     }
@@ -138,7 +155,7 @@ public final class ScheduleRepository {
 
     public func getDetailedIntervals(slots: [BlackoutSlot]) -> [DetailedInterval] {
         if slots.isEmpty { return [] }
-        let signature = "\(slots.count)_" + slots.map { $0.status == .POWER_OFF ? "1" : "0" }.joined()
+        let signature = "\(slots.count)_" + slots.map { $0.isEmergency ? "E" : ($0.status == .POWER_OFF ? "1" : "0") }.joined()
         lock.lock()
         if let cached = detailedIntervalsCache[signature] {
             lock.unlock()
@@ -148,6 +165,9 @@ public final class ScheduleRepository {
 
         let computed = computeDetailedIntervals(slots: slots)
         lock.lock()
+        if detailedIntervalsCache.count >= Self.MAX_INTERVAL_CACHE_ENTRIES {
+            detailedIntervalsCache.removeAll(keepingCapacity: true)
+        }
         detailedIntervalsCache[signature] = computed
         lock.unlock()
         return computed
@@ -157,31 +177,36 @@ public final class ScheduleRepository {
         var intervals: [DetailedInterval] = []
         var currentStart: Int?
         var currentEnd: Int?
+        var currentHasEmergency: Bool = false
 
         for slot in slots {
             if slot.status == .POWER_OFF {
                 if currentStart == nil {
                     currentStart = slot.startMinute
                     currentEnd = slot.endMinute
+                    currentHasEmergency = slot.isEmergency
                 } else if currentEnd == slot.startMinute {
                     currentEnd = slot.endMinute
+                    if slot.isEmergency { currentHasEmergency = true }
                 } else {
                     if let s = currentStart, let e = currentEnd {
-                        intervals.append(makeInterval(startMin: s, endMin: e))
+                        intervals.append(makeInterval(startMin: s, endMin: e, isEmergency: currentHasEmergency))
                     }
                     currentStart = slot.startMinute
                     currentEnd = slot.endMinute
+                    currentHasEmergency = slot.isEmergency
                 }
             } else {
                 if let s = currentStart, let e = currentEnd {
-                    intervals.append(makeInterval(startMin: s, endMin: e))
+                    intervals.append(makeInterval(startMin: s, endMin: e, isEmergency: currentHasEmergency))
                     currentStart = nil
                     currentEnd = nil
+                    currentHasEmergency = false
                 }
             }
         }
         if let s = currentStart, let e = currentEnd {
-            intervals.append(makeInterval(startMin: s, endMin: e))
+            intervals.append(makeInterval(startMin: s, endMin: e, isEmergency: currentHasEmergency))
         }
         return intervals
     }
@@ -259,7 +284,51 @@ public final class ScheduleRepository {
         )
     }
 
-    private func makeInterval(startMin: Int, endMin: Int) -> DetailedInterval {
+    public func applyEmergencyOutageToSlots(
+        slots: [BlackoutSlot],
+        startTime: String?,
+        restoreTime: String?,
+        isTomorrow: Bool = false
+    ) -> [BlackoutSlot] {
+        guard let startRaw = startTime, !startRaw.isEmpty,
+              let endRaw = restoreTime, !endRaw.isEmpty else {
+            return slots
+        }
+        func parseMin(_ str: String) -> Int? {
+            let comps = str.split(separator: " ")
+            let timePart = comps.last ?? Substring(str)
+            let hm = timePart.split(separator: ":")
+            guard hm.count >= 2, let h = Int(hm[0]), let m = Int(hm[1]) else { return nil }
+            return min(1440, max(0, h * 60 + m))
+        }
+        guard let sMin = parseMin(startRaw), let eMin = parseMin(endRaw) else { return slots }
+        let overlapStart = isTomorrow ? 0 : sMin
+        let overlapEnd = isTomorrow ? eMin : (eMin <= sMin ? 1440 : eMin)
+        guard overlapEnd > overlapStart else { return slots }
+
+        let baseSlots: [BlackoutSlot] = slots.isEmpty ? (0..<48).map { idx in
+            let sm = idx * 30
+            let em = sm + 30
+            let label = String(format: "%02d:%02d - %02d:%02d", sm / 60, sm % 60, em / 60, em % 60)
+            return BlackoutSlot(index: idx, startMinute: sm, endMinute: em, label: label, status: .POWER_ON)
+        } : slots
+
+        return baseSlots.map { slot in
+            if slot.startMinute < overlapEnd && slot.endMinute > overlapStart {
+                return BlackoutSlot(
+                    index: slot.index,
+                    startMinute: slot.startMinute,
+                    endMinute: slot.endMinute,
+                    label: slot.label,
+                    status: .POWER_OFF,
+                    isEmergency: true
+                )
+            }
+            return slot
+        }
+    }
+
+    private func makeInterval(startMin: Int, endMin: Int, isEmergency: Bool = false) -> DetailedInterval {
         let startStr = String(format: "%02d:%02d", startMin / 60, startMin % 60)
         let endStr = String(format: "%02d:%02d", endMin / 60, endMin % 60)
         let hours = Double(endMin - startMin) / 60.0
@@ -268,7 +337,8 @@ public final class ScheduleRepository {
             endStr: endStr,
             startMinuteOfDay: startMin,
             endMinuteOfDay: endMin,
-            durationHours: hours
+            durationHours: hours,
+            isEmergency: isEmergency
         )
     }
 

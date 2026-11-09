@@ -214,7 +214,7 @@ function runUnitTestB() {
     path.join(ROOT_DIR, 'src/components/SettingsView.tsx'),
     'utf-8'
   );
-  const step1 = '1. Відкрийте сторінку пошуку черги на сайті https://www.ztoe.com.ua/unhooking-search.php.';
+  const step1 = '1. Відкрийте сторінку пошуку черги на сайті https://www.ztoe.com.ua/unhooking-search.php';
   const step2 = '2. Оберіть свій РЕМ, населений пункт і вулицю.';
   const step3 =
     '3. У таблиці знайдіть свій будинок і подивіться стовпці «Черга» і «Підчерга». Наприклад, черга 5 і підчерга 2 - це 5.2.';
@@ -222,18 +222,20 @@ function runUnitTestB() {
 
   assert.ok(
     appStringsKt.includes(step1) &&
+      !appStringsKt.includes(`${step1}.`) &&
       appStringsKt.includes(step2) &&
       appStringsKt.includes(step3) &&
       appStringsKt.includes(step4),
-    'AppStrings.kt must preserve exact 4-step queue help instructions'
+    'AppStrings.kt must preserve exact 4-step queue help instructions without trailing period on step 1 URL'
   );
   assert.ok(
     settingsViewTsx.includes('1. Відкрийте сторінку пошуку черги на сайті') &&
       settingsViewTsx.includes('https://www.ztoe.com.ua/unhooking-search.php') &&
+      !settingsViewTsx.includes('</a>.') &&
       settingsViewTsx.includes(step2) &&
       settingsViewTsx.includes(step3) &&
       settingsViewTsx.includes(step4),
-    'SettingsView.tsx must preserve exact 4-step queue help instructions'
+    'SettingsView.tsx must preserve exact 4-step queue help instructions without trailing period after step 1 link'
   );
 
   // 5. Verify Widget status labels ("СВІТЛО Є" / "СВІТЛА НЕМАЄ") and round Refresh button
@@ -2258,6 +2260,7 @@ function runUnitTestD_iOSParity() {
     'ios/ZTPreBlackoutTests/ZtoeParserTests.swift',
     'ios/Resources/donations.json',
     'ios/Resources/valid-urls.json',
+    'ios/Resources/PRIVACY_POLICY.md',
     '.github/workflows/build-ipa.yml',
     'IOS_HANDOVER.md',
     'public/iOS-ZTPreBlackoutNotification.zip',
@@ -2303,6 +2306,7 @@ function runUnitTestD_iOSParity() {
       appStringsSwift.includes('Charity / Благодійність і Пожертви') &&
       appStringsSwift.includes('Світло в Житомирі на Github') &&
       appStringsSwift.includes('Зрозуміло') &&
+      appStringsSwift.includes('privacyPolicyButton') &&
       modelsSwift.includes('advanceNoticeMinutes: Int = 15') &&
       modelsSwift.includes('refreshIntervalMinutes: Int = 30') &&
       modelsSwift.includes('MAX_ROULETTE_SCORE: Int = 9_999_999') &&
@@ -2337,6 +2341,7 @@ function runUnitTestD_iOSParity() {
   const readmeMd = fs.readFileSync(path.join(ROOT_DIR, 'README.md'), 'utf-8');
   const privacyPolicyMd = fs.readFileSync(path.join(ROOT_DIR, 'PRIVACY_POLICY.md'), 'utf-8');
   const publicPrivacyPolicyMd = fs.readFileSync(path.join(ROOT_DIR, 'public/PRIVACY_POLICY.md'), 'utf-8');
+  const iosPrivacyPolicyMd = fs.readFileSync(path.join(ROOT_DIR, 'ios/Resources/PRIVACY_POLICY.md'), 'utf-8');
   const publicPrivacyHtmlDoc = fs.readFileSync(path.join(ROOT_DIR, 'public/privacy.html'), 'utf-8');
 
   assert.ok(
@@ -2376,9 +2381,95 @@ function runUnitTestD_iOSParity() {
       privacyPolicyMd.includes('Apple App Store Review Guidelines') &&
       !publicPrivacyPolicyMd.includes('Android') &&
       !publicPrivacyPolicyMd.includes('Google') &&
+      !iosPrivacyPolicyMd.includes('Android') &&
+      !iosPrivacyPolicyMd.includes('Google') &&
       !publicPrivacyHtmlDoc.includes('Android') &&
       !publicPrivacyHtmlDoc.includes('Google'),
     'iOS, Web codebase, README.md, and PRIVACY_POLICY.md must not contain any Android, Google, Play Store, Kotlin, Glance, or APK mentions'
+  );
+
+  // Verify Privacy Policy button & popup modal at the bottom of About screen
+  assert.ok(
+    aboutViewTsx.includes('PRIVACY_POLICY.md?raw') &&
+      aboutViewTsx.includes('data-testid="open-privacy-policy-btn"') &&
+      aboutViewTsx.includes('data-testid="privacy-policy-modal"') &&
+      aboutViewTsx.includes('isPrivacyPolicyOpen') &&
+      aboutScreenSwift.includes('isPrivacyPolicyPresented') &&
+      aboutScreenSwift.includes('loadPrivacyPolicyMarkdown()') &&
+      aboutScreenSwift.includes('AppStrings.privacyPolicyButton(lang)') &&
+      iosPrivacyPolicyMd === privacyPolicyMd,
+    'AboutView.tsx and AboutScreen.swift must include a bottom button to popup the full contents of PRIVACY_POLICY.md'
+  );
+
+  // Verify iOS-native SF Pro / SF Mono typography, UISwitch toggles, and UISegmentedControl language picker
+  const indexCss = fs.readFileSync(path.join(ROOT_DIR, 'src/index.css'), 'utf-8');
+  const settingsViewTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/SettingsView.tsx'), 'utf-8');
+  const mainViewTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/MainView.tsx'), 'utf-8');
+  const settingsScreenSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/ZTPreBlackout/UI/SettingsScreen.swift'), 'utf-8');
+  const mainScreenSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/ZTPreBlackout/UI/MainScreen.swift'), 'utf-8');
+  assert.ok(
+    indexCss.includes('SF Pro Display') &&
+      indexCss.includes('SF Pro Text') &&
+      indexCss.includes('SF Mono') &&
+      indexCss.includes('tabular-nums') &&
+      settingsViewTsx.includes('data-testid="ios-switch-notifications"') &&
+      settingsViewTsx.includes('data-testid="ios-switch-sound"') &&
+      settingsViewTsx.includes('data-testid="ios-switch-vibration"') &&
+      settingsViewTsx.includes('w-[51px] h-[31px]') &&
+      settingsViewTsx.includes('data-testid="ios-segmented-language"') &&
+      !settingsViewTsx.includes('whitespace-nowrap') &&
+      !settingsViewTsx.includes('</a>.') &&
+      translations.uk.siteSchedulesLabel === 'Графіки відключень на сайті' &&
+      translations.en.siteSchedulesLabel === 'Blackout schedules on website' &&
+      mainViewTsx.includes('Графіки відключень на сайті') &&
+      mainViewTsx.includes('Blackout schedules on website') &&
+      settingsScreenSwift.includes('.pickerStyle(.segmented)') &&
+      mainScreenSwift.includes('.monospacedDigit()'),
+    'Web Simulator and native SwiftUI views must use SF Pro/SF Mono tabular numerals, iOS 51x31pt UISwitch toggles, non-clipping iOS Segmented Control for language selection, no trailing period after step 1 link, and localized bottom schedule link'
+  );
+
+  // Verify Unset Default Queue on Fresh Install / Reset, Dimmed Main Screen, and Interactive ZTOE Address Lookup with Custom Status Text
+  const alertManagerTs = fs.readFileSync(path.join(ROOT_DIR, 'src/services/alertManager.ts'), 'utf-8');
+  const settingsRepoSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/SettingsRepository.swift'), 'utf-8');
+  const navSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/ZTPreBlackout/UI/BlackoutAppNavigation.swift'), 'utf-8');
+  const addressLookupTs = fs.readFileSync(path.join(ROOT_DIR, 'src/services/ztoeAddressLookup.ts'), 'utf-8');
+  assert.ok(
+    alertManagerTs.includes("queue: ''") &&
+      modelsSwift.includes('queue: String = ""') &&
+      modelsSwift.includes('customQueueStatusText: String? = nil') &&
+      settingsRepoSwift.includes('readSafeString(key: "queue", defaultValue: "")') &&
+      mainViewTsx.includes('data-testid="unselected-queue-header-btn"') &&
+      mainViewTsx.includes('Виберіть чергу') &&
+      mainViewTsx.includes('Select queue') &&
+      mainViewTsx.includes('data-testid="first-start-language-switch"') &&
+      mainViewTsx.includes("{ id: 'system', label: 'Auto' }") &&
+      mainViewTsx.includes("{ id: 'en', label: 'English' }") &&
+      mainViewTsx.includes("{ id: 'uk', label: 'Українська' }") &&
+      mainViewTsx.includes('data-testid="main-dimmed-content-wrapper"') &&
+      mainViewTsx.includes('opacity-15 brightness-50') &&
+      mainViewTsx.includes('data-testid="main-custom-queue-status-text"') &&
+      mainScreenSwift.includes('Виберіть чергу') &&
+      mainScreenSwift.includes('Select queue') &&
+      mainScreenSwift.includes('Text("Auto").tag("system")') &&
+      mainScreenSwift.includes('Text("English").tag("en")') &&
+      mainScreenSwift.includes('Text("Українська").tag("uk")') &&
+      mainScreenSwift.includes('.opacity(isQueueUnselected ? 0.15 : 1.0)') &&
+      mainScreenSwift.includes('.disabled(isQueueUnselected)') &&
+      navSwift.includes('autoOpenQueueHelp = true') &&
+      navSwift.includes('selectedPage = 1') &&
+      settingsViewTsx.includes('data-testid="ztoe-address-lookup-section"') &&
+      !settingsViewTsx.includes('"grid grid-cols-2 gap-2"') &&
+      settingsViewTsx.includes('data-testid="ztoe-select-rem"') &&
+      settingsViewTsx.includes('data-testid="ztoe-select-settlement"') &&
+      settingsViewTsx.includes('data-testid="ztoe-select-street"') &&
+      settingsViewTsx.includes('data-testid="ztoe-select-house"') &&
+      settingsViewTsx.includes('data-testid="ztoe-lookup-status-text"') &&
+      settingsViewTsx.includes('data-testid="ztoe-lookup-confirm-btn"') &&
+      settingsScreenSwift.includes('Пошук черги за адресою') &&
+      settingsScreenSwift.includes('Find Queue by Address') &&
+      settingsScreenSwift.includes('В цей час не вимикається') &&
+      addressLookupTs.includes('parseZtoeAddressLookupTableHtml'),
+    'Default queue must be unset (""), Main screen must show Auto/English/Ukrainian language switch and "Виберіть чергу" / "Select queue" button and darkly dim all other elements, tapping it must navigate to Settings and open Queue Help popup with stacked Street/House fields, and ZTOE address lookup must support custom status text on Main screen'
   );
 
   assert.ok(
@@ -2457,7 +2548,629 @@ function runUnitTestD_iOSParity() {
     '.github/workflows/build-ipa.yml must build unsigned .ipa and support optional signing secrets on macos-14'
   );
 
-  console.log('Unit Test D PASSED: iOS 17.0+ native Swift/SwiftUI/WidgetKit/XCTest port, Apple Guidelines compliance, and iPhone 393x852 Emulator verified.');
+  console.log('Unit Test D PASSED: iOS 17.0+ native Swift/SwiftUI/WidgetKit/XCTest port, Apple Guidelines compliance, iOS HIG controls, Privacy Policy modal, and iPhone 393x852 Emulator verified.');
+}
+
+async function runUnitTestE_AddressLookupAndUnsetQueue() {
+  const {
+    DEFAULT_SETTINGS,
+    checkAndTriggerAdvanceAlert,
+    checkAndTriggerEmergencyOutageAlert,
+    clearNotifiedHistory,
+    resetAllAppDataToFirstLaunch,
+  } = await import('../src/services/alertManager');
+  const {
+    fetchFullSchedules,
+    applyEmergencyOutageToSchedule,
+    createEmptyDaySlots,
+  } = await import('../src/services/ztoeParser');
+  const {
+    ZTOE_REM_OPTIONS,
+    ZTOE_FULL_NO_OUTAGE_MESSAGE,
+    getSettlementsForRem,
+    getStreetsForSettlement,
+    getHousesForStreet,
+    parseZtoeAddressLookupTableHtml,
+    formatZtoeOutageTimestamp,
+    parseZtoeEmergencyOutagesTableHtml,
+    matchEmergencyOutageFromAccidentsJson,
+    checkAddressOnZtoeWebsite,
+    checkEmergencyOutageOnZtoe,
+  } = await import('../src/services/ztoeAddressLookup');
+
+  assert.equal(DEFAULT_SETTINGS.queue, '', 'DEFAULT_SETTINGS.queue must be empty string ("") upon fresh install');
+  assert.equal(
+    ZTOE_FULL_NO_OUTAGE_MESSAGE,
+    'В цей час не вимикається, за винятком випадків аварійних відключень',
+    'Full ZTOE no-outage message must not be shortened'
+  );
+
+  // Verify fetchFullSchedules with unselected queue ("") returns empty/unclear schedule without Queue 1.1 data
+  const emptyQueueScheduleRes = await fetchFullSchedules('https://www.ztoe.com.ua/unhooking-search.php', '');
+  assert.equal(emptyQueueScheduleRes.todaySchedule.queue, '', 'Unselected queue schedule must have empty queue');
+  assert.equal(
+    emptyQueueScheduleRes.todaySchedule.slots.length,
+    0,
+    'Unselected queue schedule must have 0 slots (no Queue 1.1 counter or outages)'
+  );
+  assert.equal(
+    emptyQueueScheduleRes.todaySchedule.isUnclear,
+    true,
+    'Unselected queue schedule must be marked isUnclear as if site is not reachable'
+  );
+  assert.equal(emptyQueueScheduleRes.tomorrowSchedule, null, 'Unselected queue tomorrowSchedule must be null');
+
+  // Verify checkAndTriggerAdvanceAlert returns null when queue is unselected
+  const alertRes = checkAndTriggerAdvanceAlert(
+    {
+      dateStr: '2026-11-09',
+      dayLabel: 'Сьогодні',
+      queue: '',
+      city: 'Житомир (ZTOE)',
+      slots: [],
+      lastUpdated: '12:00',
+      sourceUrl: 'https://www.ztoe.com.ua/unhooking-search.php',
+    },
+    DEFAULT_SETTINGS,
+    'uk',
+    () => {}
+  );
+  assert.equal(alertRes, null, 'checkAndTriggerAdvanceAlert must return null when queue is unselected');
+
+  // Verify cascading ZTOE address lookup options
+  assert.ok(ZTOE_REM_OPTIONS.length >= 4, 'ZTOE_REM_OPTIONS must provide REM districts');
+  const zhytomyrSettlements = getSettlementsForRem('zhytomyr');
+  assert.ok(zhytomyrSettlements.length >= 1, 'getSettlementsForRem("zhytomyr") must return settlements');
+  const streets = getStreetsForSettlement(zhytomyrSettlements[0].id);
+  assert.ok(streets.length >= 1, 'getStreetsForSettlement must return streets');
+  const kyivskaHouses = getHousesForStreet('zt_kyivska');
+  assert.ok(kyivskaHouses.length >= 3, 'getHousesForStreet("zt_kyivska") must return house records');
+
+  const normalHouse = kyivskaHouses.find((h) => h.house === '1');
+  assert.ok(normalHouse && normalHouse.queue === '1.1' && !normalHouse.statusText);
+
+  const emergencyHouse37 = kyivskaHouses.find((h) => h.house === '37');
+  assert.ok(
+    emergencyHouse37 &&
+      emergencyHouse37.queue === '2.2' &&
+      emergencyHouse37.emergencyOutage &&
+      emergencyHouse37.emergencyOutage.outageType === 'Аварійне відключення' &&
+      emergencyHouse37.emergencyOutage.startTime.endsWith('22:00') &&
+      emergencyHouse37.emergencyOutage.estimatedRestoreTime.endsWith('23:59'),
+    'Житомир, вул. Київська, 37 must be included in zt_kyivska with queue 2.2 and active emergencyOutage matching ZTOE 22:00–23:59'
+  );
+
+  const checkedEmergency37 = await checkEmergencyOutageOnZtoe({
+    remId: 'zhytomyr',
+    settlementId: 'zt_city',
+    streetId: 'zt_kyivska',
+    house: '37',
+  });
+  assert.ok(
+    checkedEmergency37 &&
+      checkedEmergency37.outageType === 'Аварійне відключення',
+    'checkEmergencyOutageOnZtoe must return active emergency outage for Житомир, вул. Київська, 37'
+  );
+
+  const customTextHouse = kyivskaHouses.find((h) => h.house.includes('104'));
+  assert.ok(
+    customTextHouse &&
+      customTextHouse.queue === '' &&
+      customTextHouse.statusText === 'В цей час не вимикається, за винятком випадків аварійних відключень' &&
+      !customTextHouse.statusText.includes('...'),
+    'House with custom status text instead of queue/subqueue must have queue === "" and full unshortened ZTOE message'
+  );
+
+  // Verify HTML table parser for ZTOE address lookup rows (both 3-column and 7-column real ZTOE format)
+  const sampleLookupHtml = `
+    <table>
+      <tr><td>РЕМ</td><td>Населений пункт</td><td>Назва вулиці, провулка, тощо</td><td>Будинки</td><td>Черга</td><td>Підчерга</td><td>Примітка</td></tr>
+      <tr><td>Житомирський</td><td>місто Житомир</td><td>вул. Київська</td><td>10</td><td>5</td><td>2</td><td>побутові споживачі</td></tr>
+      <tr><td>Житомирський</td><td>місто Житомир</td><td>вул. Київська</td><td>106, 110</td><td>В цей час не вимикається, за винятком випадків аварійних відключень</td><td>В цей час не вимикається, за винятком випадків аварійних відключень</td><td>побутові споживачі</td></tr>
+    </table>
+  `;
+  const parsedRows = parseZtoeAddressLookupTableHtml(sampleLookupHtml);
+  assert.equal(parsedRows.length, 3, 'parseZtoeAddressLookupTableHtml must extract all 3 houses (10, 106, 110)');
+  assert.equal(parsedRows[0].house, '10');
+  assert.equal(parsedRows[0].queue, '5.2');
+  assert.equal(parsedRows[0].statusText, undefined);
+
+  assert.equal(parsedRows[1].house, '106');
+  assert.equal(parsedRows[1].queue, '');
+  assert.equal(
+    parsedRows[1].statusText,
+    'В цей час не вимикається, за винятком випадків аварійних відключень'
+  );
+
+  assert.equal(parsedRows[2].house, '110');
+  assert.equal(parsedRows[2].queue, '');
+  assert.equal(
+    parsedRows[2].statusText,
+    'В цей час не вимикається, за винятком випадків аварійних відключень'
+  );
+
+  // Verify Emergency Outage ("Аварійне відключення") HTML table parser & live JSON API matcher
+  assert.equal(
+    formatZtoeOutageTimestamp('2026-11-09T06:35:59+00:00'),
+    '09.11.2026 06:35',
+    'formatZtoeOutageTimestamp must format ZTOE ISO timestamps as DD.MM.YYYY HH:mm'
+  );
+
+  const sampleEmergencyHtml = `
+    <table>
+      <thead>
+        <tr>
+          <th>РЕМ</th><th>Населений пункт</th><th>Вулиця</th><th>Будинок</th><th>Тип відключення</th><th>Час відключення</th><th>Очікуваний час ввімкнення</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Житомирський РЕМ</td><td>Житомир</td><td>вул. Київська</td><td>77, 104</td><td>Аварійне відключення</td><td>2026-11-09T08:15:00+00:00</td><td>2026-11-09T14:00:00+00:00</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+  const emergencyRows = parseZtoeEmergencyOutagesTableHtml(sampleEmergencyHtml);
+  assert.equal(emergencyRows.length, 2, 'parseZtoeEmergencyOutagesTableHtml must extract emergency outage rows for houses 77 and 104');
+  assert.equal(emergencyRows[1].house, '104');
+  assert.equal(emergencyRows[1].outageType, 'Аварійне відключення');
+  assert.equal(emergencyRows[1].startTime, '09.11.2026 08:15');
+  assert.equal(emergencyRows[1].estimatedRestoreTime, '09.11.2026 14:00');
+
+  const matchedEmergencyJson = matchEmergencyOutageFromAccidentsJson(
+    [
+      {
+        id: 391337999,
+        city: { name: 'Житомир' },
+        street: { name: 'вул. Київська' },
+        buildingNames: '10, 77, 104, 106',
+        dateEvent: '2026-11-09T09:20:00+00:00',
+        datePlanIn: '2026-11-09T16:30:00+00:00',
+        typeOff: 1,
+        switchSubReason: 0,
+      },
+    ],
+    {
+      remId: 'zhytomyr',
+      settlementId: 'zt_city',
+      streetId: 'zt_kyivska',
+      house: '104',
+    }
+  );
+  assert.ok(matchedEmergencyJson, 'matchEmergencyOutageFromAccidentsJson must match active emergency outage for house 104');
+  assert.equal(matchedEmergencyJson.id, 'pw_accident_391337999');
+  assert.equal(matchedEmergencyJson.outageType, 'Аварійне відключення');
+  assert.equal(matchedEmergencyJson.startTime, '09.11.2026 09:20');
+  assert.equal(matchedEmergencyJson.estimatedRestoreTime, '09.11.2026 16:30');
+
+  // Verify state-transition notifications for Emergency Outages (Detect once -> no repeat -> Restore once)
+  clearNotifiedHistory();
+  const enabledSettings = { ...DEFAULT_SETTINGS, queue: '5.2', notificationsEnabled: true, soundEnabled: false, vibrationEnabled: false };
+  const detectNotification = checkAndTriggerEmergencyOutageAlert(
+    null,
+    matchedEmergencyJson,
+    enabledSettings,
+    'uk'
+  );
+  assert.ok(detectNotification, 'checkAndTriggerEmergencyOutageAlert must fire once when emergency outage is first detected');
+  assert.equal(detectNotification.title, 'Аварійне відключення');
+  assert.ok(
+    detectNotification.message.includes('09.11.2026 09:20') &&
+      detectNotification.message.includes('09.11.2026 16:30'),
+    'Emergency outage detection notification must include start and estimated restore times'
+  );
+
+  // Subsequent refresh while same emergency outage is active must NOT fire duplicate alert
+  const duplicateDetect = checkAndTriggerEmergencyOutageAlert(
+    matchedEmergencyJson,
+    matchedEmergencyJson,
+    enabledSettings,
+    'uk'
+  );
+  assert.equal(duplicateDetect, null, 'checkAndTriggerEmergencyOutageAlert must not fire duplicate notification while same outage is active');
+
+  // When emergency outage clears (nextOutage = null), restoration notification must fire once
+  const restoreNotification = checkAndTriggerEmergencyOutageAlert(
+    matchedEmergencyJson,
+    null,
+    enabledSettings,
+    'uk'
+  );
+  assert.ok(restoreNotification, 'checkAndTriggerEmergencyOutageAlert must fire once when emergency outage is restored');
+  assert.equal(restoreNotification.title, 'Аварійне відключення завершено');
+
+  // When Notifications switch is OFF, no emergency outage notification fires
+  const disabledDetect = checkAndTriggerEmergencyOutageAlert(
+    null,
+    { ...matchedEmergencyJson, id: 'pw_accident_400' },
+    { ...enabledSettings, notificationsEnabled: false },
+    'uk'
+  );
+  assert.equal(disabledDetect, null, 'Emergency outage alerts must respect existing Notifications switch in Settings');
+
+  // Verify checkAddressOnZtoeWebsite re-checks saved address against ZTOE website or fallback directory
+  // Specifically verify that for house 104 (which has both a 5.2 commercial row and a no-outage message row on live ZTOE),
+  // checkAddressOnZtoeWebsite preserves queue === "" and does NOT overwrite it with "5.2"
+  const checkedNoQueue = await checkAddressOnZtoeWebsite({
+    remId: 'zhytomyr',
+    settlementId: 'zt_city',
+    streetId: 'zt_kyivska',
+    house: '104',
+  });
+  assert.ok(checkedNoQueue, 'checkAddressOnZtoeWebsite must return a result for house 104');
+  assert.notEqual(checkedNoQueue.queue, '5.2', 'checkAddressOnZtoeWebsite must not pick "5.2" for house 104');
+  assert.equal(checkedNoQueue.queue, '', 'checkAddressOnZtoeWebsite must keep queue === "" for house 104');
+  assert.equal(
+    checkedNoQueue.statusText,
+    'В цей час не вимикається, за винятком випадків аварійних відключень',
+    'checkAddressOnZtoeWebsite must return full statusText for house 104'
+  );
+
+  const checkedWithQueue = await checkAddressOnZtoeWebsite({
+    remId: 'zhytomyr',
+    settlementId: 'zt_city',
+    streetId: 'zt_kyivska',
+    house: '77',
+  });
+  assert.ok(
+    checkedWithQueue && checkedWithQueue.queue === '5.2',
+    'checkAddressOnZtoeWebsite must return assigned queue when house has a queue'
+  );
+
+  // Verify that even when the live ZTOE website HTML returns a row with Queue 3, Subqueue 2 (3.2) for house 77,
+  // checkAddressOnZtoeWebsite preserves the user's selected address queue (5.2) and never changes it to 3.2
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = (async () => {
+      const mockHtml = `
+        <table>
+          <tr><td>Черга</td><td>Підчерга</td><td>Будинки</td></tr>
+          <tr><td>3</td><td>2</td><td>75, 77, 79</td></tr>
+        </table>
+      `;
+      const encoded = new TextEncoder().encode(mockHtml);
+      return {
+        ok: true,
+        arrayBuffer: async () => encoded.buffer,
+      } as Response;
+    }) as typeof fetch;
+
+    const checkedWithMockLiveHtml = await checkAddressOnZtoeWebsite({
+      remId: 'zhytomyr',
+      settlementId: 'zt_city',
+      streetId: 'zt_kyivska',
+      house: '77',
+    });
+    assert.ok(checkedWithMockLiveHtml, 'checkAddressOnZtoeWebsite must return a result with live HTML');
+    assert.equal(
+      checkedWithMockLiveHtml.queue,
+      '5.2',
+      'Selecting queue 5.2 via address search (house 77) must remain 5.2 and NOT change to 3.2 when live HTML is fetched'
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  // Verify Emergency Outage schedule takes priority and overlaps ZTOE scheduled outages on:
+  // 1) Drum chart on main screen (getChartHalfHourBlocks)
+  // 2) Main timer (calculateOutageCountdown)
+  // 3) Blackout schedule for today and tomorrow (getBlackoutIntervals)
+  const baseTodaySlots = createEmptyDaySlots('2026-11-09', '2.2').map((slot, idx) => {
+    // Scheduled outages: 04:00–08:00 (idx 8..15), 10:00–14:00 (idx 20..27), 16:00–20:00 (idx 32..39), 22:00–24:00 (idx 44..47)
+    const isScheduledOff =
+      (idx >= 8 && idx < 16) ||
+      (idx >= 20 && idx < 28) ||
+      (idx >= 32 && idx < 40) ||
+      (idx >= 44 && idx < 48);
+    return { ...slot, status: isScheduledOff ? ('POWER_OFF' as const) : ('POWER_ON' as const) };
+  });
+  const baseTomorrowSlots = createEmptyDaySlots('2026-11-10', '2.2').map((slot, idx) => {
+    // Scheduled tomorrow outages: 03:00–06:00 (idx 6..11), 14:00–18:00 (idx 28..35)
+    const isScheduledOff = (idx >= 6 && idx < 12) || (idx >= 28 && idx < 36);
+    return { ...slot, status: isScheduledOff ? ('POWER_OFF' as const) : ('POWER_ON' as const) };
+  });
+
+  const sampleTodaySchedule = {
+    dateStr: '2026-11-09',
+    dayLabel: 'Сьогодні',
+    queue: '2.2',
+    city: 'Житомир (ZTOE)',
+    slots: baseTodaySlots,
+    lastUpdated: '12:00',
+    sourceUrl: 'https://www.ztoe.com.ua/unhooking-search.php',
+    isUnclear: false,
+  };
+  const sampleTomorrowSchedule = {
+    dateStr: '2026-11-10',
+    dayLabel: 'Завтра',
+    queue: '2.2',
+    city: 'Житомир (ZTOE)',
+    slots: baseTomorrowSlots,
+    lastUpdated: '12:00',
+    sourceUrl: 'https://www.ztoe.com.ua/unhooking-search.php',
+    isUnclear: false,
+  };
+
+  // Emergency outage spanning Today 11:30 -> Tomorrow 04:00
+  const spanningEmergency = {
+    id: 'pw_accident_zt_kyivska_37',
+    outageType: 'Аварійне відключення',
+    startTime: '09.11.2026 11:30',
+    estimatedRestoreTime: '10.11.2026 04:00',
+  };
+
+  const overlappedToday = applyEmergencyOutageToSchedule(sampleTodaySchedule, spanningEmergency, false)!;
+  const overlappedTomorrow = applyEmergencyOutageToSchedule(sampleTomorrowSchedule, spanningEmergency, true)!;
+
+  const overlappedTodayIntervals = getBlackoutIntervals(overlappedToday.slots);
+  // Today: 04:00–08:00 remains intact, while 10:00–14:00 + emergency 11:30–24:00 + 16:00–20:00 + 22:00–24:00 merge into 10:00–24:00 (14h)
+  assert.equal(overlappedTodayIntervals.length, 2, 'Overlapped Today schedule must merge 10:00–24:00 into a single continuous blackout interval');
+  assert.equal(`${overlappedTodayIntervals[0].start} – ${overlappedTodayIntervals[0].end}`, '04:00 – 08:00');
+  assert.equal(Boolean(overlappedTodayIntervals[0].isEmergency), false, 'Regular scheduled interval 04:00–08:00 must not be marked as emergency');
+  assert.equal(`${overlappedTodayIntervals[1].start} – ${overlappedTodayIntervals[1].end}`, '10:00 – 24:00');
+  assert.equal(overlappedTodayIntervals[1].durationHours, 14);
+  assert.equal(overlappedTodayIntervals[1].isEmergency, true, 'Overlapped Today interval 10:00–24:00 must be marked with isEmergency: true');
+
+  // Drum chart on Today must show 14:00–16:00 and 20:00–22:00 gaps filled in as POWER_OFF
+  const overlappedTodayBlocks = getChartHalfHourBlocks(overlappedToday.slots);
+  assert.equal(overlappedTodayBlocks[14].half1Off, true, 'Drum chart hour 14 must be POWER_OFF due to emergency outage overlap');
+  assert.equal(overlappedTodayBlocks[15].half2Off, true, 'Drum chart hour 15 must be POWER_OFF due to emergency outage overlap');
+  assert.equal(overlappedTodayBlocks[20].half1Off, true, 'Drum chart hour 20 must be POWER_OFF due to emergency outage overlap');
+  assert.equal(overlappedTodayBlocks[2].half1Off, false, 'Drum chart hour 02 outside both scheduled and emergency outages must remain POWER_ON');
+
+  const overlappedTomorrowIntervals = getBlackoutIntervals(overlappedTomorrow.slots);
+  // Tomorrow: emergency 00:00–04:00 overlaps scheduled 03:00–06:00 into 00:00–06:00 (6h), plus scheduled 14:00–18:00 (4h)
+  assert.equal(overlappedTomorrowIntervals.length, 2, 'Overlapped Tomorrow schedule must merge 00:00–04:00 emergency outage with 03:00–06:00 scheduled outage');
+  assert.equal(`${overlappedTomorrowIntervals[0].start} – ${overlappedTomorrowIntervals[0].end}`, '00:00 – 06:00');
+  assert.equal(overlappedTomorrowIntervals[0].durationHours, 6);
+  assert.equal(overlappedTomorrowIntervals[0].isEmergency, true, 'Overlapped Tomorrow interval 00:00–06:00 must be marked with isEmergency: true');
+  assert.equal(`${overlappedTomorrowIntervals[1].start} – ${overlappedTomorrowIntervals[1].end}`, '14:00 – 18:00');
+  assert.equal(Boolean(overlappedTomorrowIntervals[1].isEmergency), false, 'Regular scheduled Tomorrow interval 14:00–18:00 must not be marked as emergency');
+
+  // Also verify that when an emergency outage (22:00–23:59) completely coincides with an already scheduled POWER_OFF block (22:00–24:00),
+  // the resulting interval in the Today/Tomorrow list is still marked with isEmergency: true
+  const coincidingEmergencySchedule = applyEmergencyOutageToSchedule(
+    sampleTodaySchedule,
+    {
+      id: 'pw_accident_391476673',
+      outageType: 'Аварійне відключення',
+      startTime: '09.11.2026 22:00',
+      estimatedRestoreTime: '09.11.2026 23:59',
+    },
+    false
+  )!;
+  const coincidingIntervals = getBlackoutIntervals(coincidingEmergencySchedule.slots);
+  const lateEveningInterval = coincidingIntervals.find((i) => i.start === '22:00' && i.end === '24:00');
+  assert.ok(lateEveningInterval, '22:00 – 24:00 interval must be present in Today list');
+  assert.equal(lateEveningInterval.isEmergency, true, '22:00 – 24:00 interval coinciding with emergency outage must have isEmergency: true');
+
+  // Main timer at 14:30 Today (which was POWER_ON in regular schedule, but is POWER_OFF under emergency outage):
+  const midAfternoonNow = new Date(2026, 10, 9, 14, 30, 0);
+  const overlappedCountdown = calculateOutageCountdown(overlappedToday, midAfternoonNow, overlappedTomorrow);
+  assert.equal(overlappedCountdown.isCurrentlyBlackout, true, 'Main timer at 14:30 must show POWER_OFF due to emergency outage priority');
+  assert.equal(
+    overlappedCountdown.slotDescription,
+    '10:00 – 06:00',
+    'Main timer period must reflect the continuous overlapped period across midnight (10:00 – 06:00)'
+  );
+  assert.equal(overlappedCountdown.formattedTimeLeft, '15:30:00', 'Main timer at 14:30 must count down 15h 30m to 06:00 tomorrow');
+
+  // Also verify emergency outage priority when regular schedule is empty/unclear (e.g. house without queue or unreachable table)
+  const unclearScheduleWithEmergency = applyEmergencyOutageToSchedule(
+    {
+      dateStr: '2026-11-09',
+      dayLabel: 'Сьогодні',
+      queue: '',
+      city: 'Житомир (ZTOE)',
+      slots: [],
+      lastUpdated: '12:00',
+      sourceUrl: 'https://www.ztoe.com.ua/unhooking-search.php',
+      isUnclear: true,
+    },
+    {
+      id: 'pw_accident_no_queue_house',
+      outageType: 'Аварійне відключення',
+      startTime: '09.11.2026 11:30',
+      estimatedRestoreTime: '09.11.2026 17:00',
+    },
+    false
+  )!;
+  assert.equal(unclearScheduleWithEmergency.isUnclear, false, 'Emergency outage must override isUnclear state');
+  assert.equal(unclearScheduleWithEmergency.slots.length, 48, 'Emergency outage on empty schedule must generate 48 half-hour slots');
+  const emergencyOnlyIntervals = getBlackoutIntervals(unclearScheduleWithEmergency.slots);
+  assert.equal(emergencyOnlyIntervals.length, 1);
+  assert.equal(`${emergencyOnlyIntervals[0].start} – ${emergencyOnlyIntervals[0].end}`, '11:30 – 17:00');
+  assert.equal(emergencyOnlyIntervals[0].isEmergency, true, 'Standalone emergency outage interval must be marked with isEmergency: true');
+
+  // Also verify live ZTOE pw_accidents record for Житомир, вул. Київська, 37 (id: 391476673, switchSubReason: 2, 09.11.2026 22:00 – 09.11.2026 23:59)
+  const matchedKyivska37Live = matchEmergencyOutageFromAccidentsJson(
+    [
+      {
+        id: 391476673,
+        city: { name: 'Житомир' },
+        street: { name: 'вул. Київська' },
+        buildingNames: '18, 20, 22, 29, 31, 31А, 33, 35, 37',
+        dateEvent: '2026-11-09T22:00:00+00:00',
+        datePlanIn: '2026-11-09T23:59:00+00:00',
+        typeOff: 1,
+        switchSubReason: 2,
+      },
+    ],
+    {
+      remId: 'zhytomyr',
+      settlementId: 'zt_city',
+      streetId: 'zt_kyivska',
+      house: '37',
+    }
+  );
+  assert.ok(matchedKyivska37Live, 'matchEmergencyOutageFromAccidentsJson must match live ZTOE record for Житомир, вул. Київська, 37');
+  assert.equal(matchedKyivska37Live.id, 'pw_accident_391476673');
+  assert.equal(matchedKyivska37Live.startTime, '09.11.2026 22:00');
+  assert.equal(matchedKyivska37Live.estimatedRestoreTime, '09.11.2026 23:59');
+
+  // Verify MainView.tsx, WidgetSimulator.tsx, SettingsView.tsx, and App.tsx:
+  // - full unshortened message
+  // - "--:--:--" placeholder in main counter when there are no outages for user's house
+  // - Drum chart with hours and light internal squares as if there is no outage
+  // - periodic re-checking of selectedAddressQuery against ZTOE website
+  // - word wrapping on second row after city so street and house are on the second row
+  // - Emergency Outage banner with start and estimated restore times + notification trigger
+  // - "Години відключень на сьогодні:" / "Blackout hours for today:" on Today tab and "Години відключень на завтра:" / "Blackout hours for tomorrow:" on Tomorrow tab
+  // - Emergency outage hours in Today/Tomorrow list marked with "!" in circle (data-testid="blackout-interval-emergency-icon")
+  // - Widget counter synchronized with Main window counter including emergency outages
+  // - Enlarged "?" button and popup in Settings with Search by Address first, followed by "Пошук вручну" / "Manual search", followed by instructions 1-4
+  const mainViewTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/MainView.tsx'), 'utf-8');
+  const mainScreenSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/ZTPreBlackout/UI/MainScreen.swift'), 'utf-8');
+  const widgetSimTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/WidgetSimulator.tsx'), 'utf-8');
+  const settingsViewTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/SettingsView.tsx'), 'utf-8');
+  const appTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/App.tsx'), 'utf-8');
+  const blackoutWidgetSwift = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/BlackoutWidgetExtension/BlackoutWidget.swift'),
+    'utf-8'
+  );
+  const phoneSimTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/PhoneSimulator.tsx'), 'utf-8');
+  const navSwiftContent = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/ZTPreBlackout/UI/BlackoutAppNavigation.swift'),
+    'utf-8'
+  );
+  const addressBlockIdx = settingsViewTsx.indexOf('data-testid="ztoe-address-lookup-section"');
+  const manualSearchTitleIdx = settingsViewTsx.indexOf('data-testid="queue-help-manual-search-title"');
+  const step1InstructionIdx = settingsViewTsx.indexOf('1. Відкрийте сторінку пошуку черги на сайті');
+  assert.ok(
+    addressBlockIdx > 0 &&
+      manualSearchTitleIdx > addressBlockIdx &&
+      step1InstructionIdx > manualSearchTitleIdx,
+    'In Settings "?" popup, Search by Address block must come first, followed by "Пошук вручну" / "Manual search", followed by instructions 1-4'
+  );
+  const firstStartBtnIdx = mainViewTsx.indexOf('data-testid="unselected-queue-header-btn"');
+  const firstStartLangIdx = mainViewTsx.indexOf('data-testid="first-start-language-switch"');
+  assert.ok(
+    firstStartBtnIdx > 0 && firstStartLangIdx > firstStartBtnIdx,
+    'On first application start, "Select queue" button must appear above the Auto/English/Ukrainian language switch'
+  );
+  assert.ok(
+    mainViewTsx.includes('hasNoQueueMessage') &&
+      mainViewTsx.includes('formatAddressAfterCity') &&
+      mainViewTsx.includes('whitespace-pre-line') &&
+      mainViewTsx.includes('data-testid="first-start-select-queue-overlay"') &&
+      mainViewTsx.includes('data-testid="first-start-language-switch"') &&
+      mainViewTsx.includes("const currentLangSetting = settings.language || 'system';") &&
+      mainViewTsx.includes('fixed inset-0 z-50 flex flex-col items-center justify-center') &&
+      mainViewTsx.includes('min-w-[260px]') &&
+      phoneSimTsx.includes('onChangeLanguage={(newLang) =>') &&
+      phoneSimTsx.includes('if (wasUnselected && isNowSelected) {') &&
+      phoneSimTsx.includes("setActiveTab('schedule');") &&
+      phoneSimTsx.includes('data-testid="bottom-nav-dock"') &&
+      phoneSimTsx.includes("opacity-15 brightness-50 pointer-events-none select-none") &&
+      navSwiftContent.includes('isFirstStartLocked') &&
+      navSwiftContent.includes('onChangeLanguage:') &&
+      navSwiftContent.includes('if wasUnselected && isNowSelected {') &&
+      navSwiftContent.includes('selectedPage = 0') &&
+      mainScreenSwift.includes('.frame(minWidth: 260)') &&
+      mainViewTsx.includes('data-testid="empty-queue-header"') &&
+      mainViewTsx.includes('data-testid="main-counter-no-queue-placeholder"') &&
+      !mainViewTsx.includes('>\n              --:-- - --:--\n            </div>') &&
+      mainViewTsx.includes('>\n              --:--:--\n            </div>') &&
+      mainViewTsx.includes('data-testid={hasNoQueueMessage ? \'drum-chart-no-outage-light\' : undefined}') &&
+      mainViewTsx.includes('isUnclear && !hasNoQueueMessage') &&
+      mainViewTsx.includes('data-testid="main-custom-queue-status-text"') &&
+      mainViewTsx.includes('data-testid="main-selected-address-text"') &&
+      mainViewTsx.includes('data-testid="main-emergency-outage-banner"') &&
+      mainViewTsx.includes('data-testid="main-emergency-outage-title"') &&
+      mainViewTsx.includes('data-testid="main-emergency-outage-times"') &&
+      mainViewTsx.includes('data-testid="blackout-interval-indicator-slot"') &&
+      mainViewTsx.includes('data-testid="blackout-interval-emergency-icon"') &&
+      mainViewTsx.includes('interval.isEmergency') &&
+      mainScreenSwift.includes('interval.isEmergency') &&
+      mainScreenSwift.includes('.frame(width: 20, height: 20)') &&
+      mainViewTsx.includes('Години відключень на сьогодні:') &&
+      !mainViewTsx.includes('Години без світла на цей день:') &&
+      mainViewTsx.includes('Години відключень на завтра:') &&
+      mainViewTsx.includes('Blackout hours for tomorrow:') &&
+      widgetSimTsx.includes('applyEmergencyOutageToSchedule') &&
+      widgetSimTsx.includes('calculateOutageCountdown(effectiveTodaySchedule, now, effectiveTomorrowSchedule)') &&
+      blackoutWidgetSwift.includes('applyEmergencyOutageToSlots') &&
+      settingsViewTsx.includes('data-testid="settings-queue-help-btn"') &&
+      settingsViewTsx.includes('data-testid="settings-queue-help-modal"') &&
+      settingsViewTsx.includes('bg-[#141A29] w-full h-full flex-1 pt-14 pb-10 px-3.5 overflow-y-auto') &&
+      settingsViewTsx.includes('w-full flex flex-col gap-3.5 p-5 rounded-3xl bg-white/[0.05] border-2 border-white/25') &&
+      settingsViewTsx.includes('w-full text-base font-bold bg-white/[0.08] border-2 border-white/20 rounded-2xl px-4 py-3.5') &&
+      settingsViewTsx.includes('Пошук вручну') &&
+      settingsViewTsx.includes('Manual search') &&
+      settingsViewTsx.includes("settings.selectedAddressQuery?.remId || 'zhytomyr'") &&
+      settingsViewTsx.includes("settings.selectedAddressQuery?.settlementId || 'zt_city'") &&
+      settingsViewTsx.includes("settings.selectedAddressQuery?.streetId || ''") &&
+      settingsViewTsx.includes("setSelectedStreetId('')") &&
+      settingsViewTsx.includes("lang === 'uk' ? 'Оберіть вулицю' : 'Select street'") &&
+      settingsViewTsx.includes("settings.selectedAddressQuery?.house || ''") &&
+      settingsViewTsx.includes('setSelectedHouseNumber(settings.selectedAddressQuery.house || \'\')') &&
+      settingsViewTsx.includes('selectedAddress: selectedAddressStr') &&
+      settingsViewTsx.includes('\\n${selectedStreetObj?.name') &&
+      settingsViewTsx.includes('selectedAddressQuery:') &&
+      appTsx.includes('checkAddressOnZtoeWebsite') &&
+      appTsx.includes('checkAndTriggerEmergencyOutageAlert'),
+    'MainView.tsx, WidgetSimulator.tsx, SettingsView.tsx, and App.tsx must synchronize widget counter with main window including emergency outages, make "?" popup full-screen with larger dropdowns/fonts and expanded internal border, leave Street unselected by default on first launch, keep selected address filled in when re-entering "?" popup, place Search by Address before "Пошук вручну" / "Manual search" and instructions 1-4, and use "Години відключень на сьогодні:" on Today tab'
+  );
+
+  // Verify Workbench "Reset All App Data & Imitate First Launch" button & resetAllAppDataToFirstLaunch helper
+  const freshSettings = resetAllAppDataToFirstLaunch();
+  assert.equal(freshSettings.queue, '', 'resetAllAppDataToFirstLaunch must reset queue to empty string ("")');
+  assert.equal(freshSettings.customQueueStatusText, undefined, 'resetAllAppDataToFirstLaunch must clear customQueueStatusText');
+  assert.equal(freshSettings.selectedAddress, undefined, 'resetAllAppDataToFirstLaunch must clear selectedAddress');
+  assert.equal(freshSettings.selectedAddressQuery, undefined, 'resetAllAppDataToFirstLaunch must clear selectedAddressQuery');
+  assert.equal(freshSettings.activeEmergencyOutage, null, 'resetAllAppDataToFirstLaunch must clear activeEmergencyOutage');
+  assert.equal(freshSettings.advanceNoticeMinutes, 15, 'resetAllAppDataToFirstLaunch must preserve 15 min advance notice');
+  assert.equal(freshSettings.refreshIntervalMinutes, 30, 'resetAllAppDataToFirstLaunch must preserve 30 min refresh interval');
+
+  const kyivZoneSwiftContent = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/KyivZone.swift'), 'utf-8');
+  const settingsRepoSwiftContent = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/SettingsRepository.swift'), 'utf-8');
+  const scheduleRepoSwiftContent = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/ScheduleRepository.swift'), 'utf-8');
+  const ztoeParserSwiftContent = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/ZtoeParser.swift'), 'utf-8');
+  const alertRegistrySwiftContent = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/ZTPreBlackout/Notifications/AlertRegistry.swift'),
+    'utf-8'
+  );
+  const notifSchedulerSwiftContent = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/ZTPreBlackout/Notifications/NotificationScheduler.swift'),
+    'utf-8'
+  );
+  const widgetIntentsSwiftContent = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/BlackoutWidgetExtension/WidgetIntents.swift'),
+    'utf-8'
+  );
+
+  assert.ok(
+    appTsx.includes('data-testid="emulator-reset-all-app-data-first-launch"') &&
+      appTsx.includes('handleResetAllAppDataFirstLaunch') &&
+      appTsx.includes('Скинути всі дані застосунку та імітувати перший запуск') &&
+      appTsx.includes('Reset All App Data & Imitate First Launch') &&
+      appTsx.includes('data-testid="emulator-simulate-emergency-outage-kyivska-37"') &&
+      appTsx.includes('Житомир, вул. Київська, 37 (Аварійне відключення)') &&
+      settingsViewTsx.includes('data-testid="ztoe-lookup-emergency-outage"') &&
+      phoneSimTsx.includes('zt-app-first-launch-reset') &&
+      // iOS Code Review Fixes & Battery/Performance Optimizations:
+      kyivZoneSwiftContent.includes('public static let calendar: Calendar') &&
+      settingsRepoSwiftContent.includes('active_emergency_outage_start') &&
+      settingsRepoSwiftContent.includes('active_emergency_outage_restore') &&
+      scheduleRepoSwiftContent.includes('MAX_INTERVAL_CACHE_ENTRIES = 64') &&
+      scheduleRepoSwiftContent.includes('Midnight rollover: promote cached tomorrow schedule') &&
+      ztoeParserSwiftContent.includes('private static let leafTableRegex') &&
+      ztoeParserSwiftContent.includes('private static let trRegex') &&
+      ztoeParserSwiftContent.includes('private static let tdRegex') &&
+      ztoeParserSwiftContent.includes('ztoe_last_etag') &&
+      alertRegistrySwiftContent.includes('MAX_STORED_ENTRIES = 100') &&
+      notifSchedulerSwiftContent.includes('applyEmergencyOutageToSlots') &&
+      widgetIntentsSwiftContent.includes('NotificationScheduler.shared.syncAlarms') &&
+      navSwiftContent.includes('emergencyOutageStartTime: settings.activeEmergencyOutageStart') &&
+      navSwiftContent.includes('guard scenePhase == .active, selectedPage == 0, !isRouletteOpen else { return }') &&
+      navSwiftContent.includes('BackgroundSyncManager.shared.schedulePeriodicWork()') &&
+      navSwiftContent.includes('getDonationsWithDailyRefresh(forceRefresh: false)') &&
+      appTsx.includes('getDonationsWithDailyRefresh(Date.now(), false)') &&
+      appTsx.includes('isCountdownScreenActive'),
+    'iOS and Web Simulator must persist emergency outages across App/Widget/Notifications, pause 1s timer off Main screen, cache Calendar/Regexes, bound caches, handle midnight rollover, and reschedule BGAppRefreshTask'
+  );
+
+  console.log('Unit Test E PASSED: Full unshortened ZTOE status message, "--:--:--" counter placeholder, light drum chart with hours, live address & emergency outage checking, Житомир вул. Київська 37 workbench button, state-change notifications, iOS battery/performance optimizations, and first-launch reset verified.');
 }
 
 function blackoutWidgetWidgetCheck(content: string): boolean {
@@ -2469,9 +3182,11 @@ async function main() {
   runUnitTestB();
   await runUnitTestC_ZhytomyrRoulette();
   runUnitTestD_iOSParity();
+  await runUnitTestE_AddressLookupAndUnsetQueue();
 }
 
 main().catch((err) => {
   console.error('UNIT TEST FAILED:', err);
   process.exit(1);
 });
+

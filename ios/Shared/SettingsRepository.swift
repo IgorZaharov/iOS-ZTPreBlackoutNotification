@@ -42,7 +42,15 @@ public final class SettingsRepository {
     }
 
     public func loadSettings() -> UserSettings {
-        let queue = readSafeString(key: "queue", defaultValue: "1.1")
+        let queue = readSafeString(key: "queue", defaultValue: "")
+        let customStatus = readSafeString(key: "custom_queue_status_text", defaultValue: "")
+        let selectedAddress = readSafeString(key: "selected_address", defaultValue: "")
+        let selectedRem = readSafeString(key: "selected_rem", defaultValue: "")
+        let selectedSettlement = readSafeString(key: "selected_settlement", defaultValue: "")
+        let selectedStreet = readSafeString(key: "selected_street", defaultValue: "")
+        let selectedHouse = readSafeString(key: "selected_house", defaultValue: "")
+        let activeEmergencyStart = readSafeString(key: "active_emergency_outage_start", defaultValue: "")
+        let activeEmergencyRestore = readSafeString(key: "active_emergency_outage_restore", defaultValue: "")
         let url = readSafeString(key: "city_url", defaultValue: AppStrings.DEFAULT_ZTOE_URL)
         let advance = min(240, max(1, readSafeInt(key: "advance_notice_minutes", defaultValue: 15)))
         let refresh = min(240, max(1, readSafeInt(key: "refresh_interval_minutes", defaultValue: 30)))
@@ -53,7 +61,15 @@ public final class SettingsRepository {
         let theme = readSafeString(key: "theme", defaultValue: "system")
 
         return UserSettings(
-            queue: UserSettings.ALL_QUEUES.contains(queue) ? queue : "1.1",
+            queue: UserSettings.ALL_QUEUES.contains(queue) ? queue : "",
+            customQueueStatusText: customStatus.isEmpty ? nil : customStatus,
+            selectedAddress: selectedAddress.isEmpty ? nil : selectedAddress,
+            selectedRem: selectedRem.isEmpty ? nil : selectedRem,
+            selectedSettlement: selectedSettlement.isEmpty ? nil : selectedSettlement,
+            selectedStreet: selectedStreet.isEmpty ? nil : selectedStreet,
+            selectedHouse: selectedHouse.isEmpty ? nil : selectedHouse,
+            activeEmergencyOutageStart: activeEmergencyStart.isEmpty ? nil : activeEmergencyStart,
+            activeEmergencyOutageRestore: activeEmergencyRestore.isEmpty ? nil : activeEmergencyRestore,
             url: url,
             advanceNoticeMinutes: advance,
             refreshIntervalMinutes: refresh,
@@ -67,6 +83,14 @@ public final class SettingsRepository {
 
     public func saveSettings(_ settings: UserSettings) {
         defaults.set(settings.queue, forKey: "queue")
+        defaults.set(settings.customQueueStatusText ?? "", forKey: "custom_queue_status_text")
+        defaults.set(settings.selectedAddress ?? "", forKey: "selected_address")
+        defaults.set(settings.selectedRem ?? "", forKey: "selected_rem")
+        defaults.set(settings.selectedSettlement ?? "", forKey: "selected_settlement")
+        defaults.set(settings.selectedStreet ?? "", forKey: "selected_street")
+        defaults.set(settings.selectedHouse ?? "", forKey: "selected_house")
+        defaults.set(settings.activeEmergencyOutageStart ?? "", forKey: "active_emergency_outage_start")
+        defaults.set(settings.activeEmergencyOutageRestore ?? "", forKey: "active_emergency_outage_restore")
         defaults.set(settings.url, forKey: "city_url")
         defaults.set(min(240, max(1, settings.advanceNoticeMinutes)), forKey: "advance_notice_minutes")
         defaults.set(min(240, max(1, settings.refreshIntervalMinutes)), forKey: "refresh_interval_minutes")

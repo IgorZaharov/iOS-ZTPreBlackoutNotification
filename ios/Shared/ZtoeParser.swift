@@ -3,8 +3,19 @@ import CoreFoundation
 
 public final class ZtoeParser {
     public static let shared = ZtoeParser()
+    private static let cacheLock = NSLock()
     private static var lastEtag: String?
     private static var lastHtmlCache: String?
+
+    // Pre-compiled static regular expressions to eliminate ~72 regex compilations per HTML refresh
+    private static let leafTableRegex = try? NSRegularExpression(pattern: "(?is)<table\\b[^>]*>(?:(?!</?table\\b).)*</table>")
+    private static let trRegex = try? NSRegularExpression(pattern: "(?is)<tr\\b[^>]*>(.*?)</tr>")
+    private static let tdRegex = try? NSRegularExpression(pattern: "(?is)<t[dh]\\b([^>]*)>(.*?)</t[dh]>")
+    private static let stripTagsRegex = try? NSRegularExpression(pattern: "<[^>]+>")
+
+    private static var defaults: UserDefaults {
+        UserDefaults(suiteName: ScheduleRepository.APP_GROUP_ID) ?? .standard
+    }
 
     public static let DEFAULT_VALID_URLS: [String] = [
         "https://www.ztoe.com.ua/unhooking-search.php",
@@ -42,7 +53,13 @@ public final class ZtoeParser {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15.0)
         request.setValue("gzip, deflate", forHTTPHeaderField: "Accept-Encoding")
         request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15", forHTTPHeaderField: "User-Agent")
-        if let etag = lastEtag {
+
+        cacheLock.lock()
+        let currentEtag = lastEtag ?? defaults.string(forKey: "ztoe_last_etag")
+        let currentHtmlCache = lastHtmlCache ?? defaults.string(forKey: "ztoe_last_html_cache")
+        cacheLock.unlock()
+
+        if let etag = currentEtag, !etag.isEmpty {
             request.setValue(etag, forHTTPHeaderField: "If-None-Match")
         }
 
@@ -54,13 +71,17 @@ public final class ZtoeParser {
             }
 
             let html: String
-            if httpResp.statusCode == 304, let cached = lastHtmlCache {
+            if httpResp.statusCode == 304, let cached = currentHtmlCache, !cached.isEmpty {
                 html = cached
             } else if (200...299).contains(httpResp.statusCode) {
                 html = decodeWindows1251(data)
                 if let newEtag = httpResp.value(forHTTPHeaderField: "ETag") {
+                    cacheLock.lock()
                     lastEtag = newEtag
                     lastHtmlCache = html
+                    defaults.set(newEtag, forKey: "ztoe_last_etag")
+                    defaults.set(html, forKey: "ztoe_last_html_cache")
+                    cacheLock.unlock()
                 }
             } else {
                 ScheduleRepository.shared.clearAllSchedulesOnUnclearState()
@@ -139,16 +160,14 @@ public final class ZtoeParser {
     }
 
     public static func extractLeafTables(from html: String) -> [String] {
-        let pattern = "(?is)<table\\b[^>]*>(?:(?!</?table\\b).)*</table>"
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
+        guard let regex = leafTableRegex else { return [] }
         let nsHtml = html as NSString
         let matches = regex.matches(in: html, range: NSRange(location: 0, length: nsHtml.length))
         return matches.map { nsHtml.substring(with: $0.range) }
     }
 
     private static func extractFirstTwoRowsText(from tableHtml: String) -> String {
-        let trPattern = "(?is)<tr\\b[^>]*>(.*?)</tr>"
-        guard let regex = try? NSRegularExpression(pattern: trPattern) else { return tableHtml }
+        guard let regex = trRegex else { return tableHtml }
         let nsTable = tableHtml as NSString
         let matches = regex.matches(in: tableHtml, range: NSRange(location: 0, length: nsTable.length))
         let rows = matches.prefix(2).map { stripTags(nsTable.substring(with: $0.range)) }
@@ -194,10 +213,8 @@ public final class ZtoeParser {
     }
 
     public static func extractQueueSlotsFromTable(tableHtml: String, targetQueue: String) -> [BlackoutSlot]? {
-        let trPattern = "(?is)<tr\\b[^>]*>(.*?)</tr>"
-        let tdPattern = "(?is)<t[dh]\\b([^>]*)>(.*?)</t[dh]>"
-        guard let trRegex = try? NSRegularExpression(pattern: trPattern),
-              let tdRegex = try? NSRegularExpression(pattern: tdPattern) else { return nil }
+        guard let trRegex = Self.trRegex,
+              let tdRegex = Self.tdRegex else { return nil }
 
         let nsTable = tableHtml as NSString
         let trMatches = trRegex.matches(in: tableHtml, range: NSRange(location: 0, length: nsTable.length))
@@ -300,7 +317,12 @@ public final class ZtoeParser {
     }
 
     private static func stripTags(_ html: String) -> String {
-        html.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+        guard let regex = stripTagsRegex else {
+            return html.replacingOccurrences(of: "&nbsp;", with: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        let nsHtml = html as NSString
+        let stripped = regex.stringByReplacingMatches(in: html, range: NSRange(location: 0, length: nsHtml.length), withTemplate: "")
+        return stripped
             .replacingOccurrences(of: "&nbsp;", with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }

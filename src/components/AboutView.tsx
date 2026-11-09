@@ -3,12 +3,12 @@ import {
   Github, 
   ExternalLink, 
   Bug, 
-  Smartphone, 
   Monitor, 
   ShieldAlert, 
   Zap,
-  Heart,
-  Globe
+  Globe,
+  FileText,
+  X
 } from 'lucide-react';
 import { translations } from '../services/i18n';
 import {
@@ -18,6 +18,7 @@ import {
   getFaviconCandidateUrls,
 } from '../services/donationsService';
 import { ZhytomyrRouletteModal } from './ZhytomyrRouletteModal';
+import privacyPolicyMarkdown from '../../PRIVACY_POLICY.md?raw';
 
 declare const __APP_VERSION__: string | undefined;
 const CURRENT_BUILD_VERSION = `v${typeof __APP_VERSION__ !== 'undefined' && /^[0-9]+\.[0-9]+/.test(__APP_VERSION__) ? __APP_VERSION__ : '1.3.3'}`;
@@ -49,6 +50,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
   const t = translations[lang];
   const [donations, setDonations] = useState<DonationLink[]>(() => getCachedDonations());
   const [isRouletteOpen, setIsRouletteOpen] = useState(false);
+  const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -242,6 +244,65 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
           {t.aboutDisclaimer}
         </div>
       </div>
+
+      {/* Privacy Policy Button (bottom of About screen) */}
+      <button
+        type="button"
+        data-testid="open-privacy-policy-btn"
+        onClick={() => setIsPrivacyPolicyOpen(true)}
+        className="w-full bg-[#141A29]/75 hover:bg-[#1B2338]/85 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center justify-center gap-2.5 text-xs font-bold text-sky-200 hover:text-white transition-all cursor-pointer active:scale-[0.99]"
+      >
+        <FileText className="w-4 h-4 text-[#FF5E3A]" />
+        <span>{lang === 'en' ? 'Privacy Policy' : 'Політика конфіденційності'}</span>
+      </button>
+
+      {/* Privacy Policy Popup Modal */}
+      {isPrivacyPolicyOpen && (
+        <div
+          data-testid="privacy-policy-modal"
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setIsPrivacyPolicyOpen(false)}
+        >
+          <div
+            className="bg-[#141A29]/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-5 max-w-md w-full max-h-[82vh] shadow-[0_20px_60px_rgba(0,0,0,0.75)] text-white relative flex flex-col gap-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/15 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#FF5E3A] flex items-center justify-center text-white shadow-md shadow-[#FF5E3A]/30">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-white tracking-tight">
+                  {lang === 'en' ? 'Privacy Policy' : 'Політика конфіденційності'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                data-testid="close-privacy-policy-btn"
+                onClick={() => setIsPrivacyPolicyOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1 rounded-2xl bg-white/[0.04] border border-white/10 p-3.5 select-text">
+              <pre className="whitespace-pre-wrap break-words font-sans text-[11px] leading-relaxed text-zinc-200">
+                {privacyPolicyMarkdown}
+              </pre>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsPrivacyPolicyOpen(false)}
+              className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-zinc-200 text-black font-bold text-xs transition-all shadow-lg text-center cursor-pointer shrink-0"
+            >
+              {lang === 'en' ? 'Got it' : 'Зрозуміло'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

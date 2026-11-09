@@ -11,6 +11,7 @@ public struct RefreshScheduleIntent: AppIntent {
     public func perform() async throws -> some IntentResult {
         let settings = SettingsRepository.shared.loadSettings()
         _ = await ZtoeParser.fetchFullSchedule(urlStr: settings.url)
+        NotificationScheduler.shared.syncAlarms(onTimeChanged: false)
         WidgetCenter.shared.reloadAllTimelines()
         return .result()
     }
@@ -26,6 +27,7 @@ public struct ToggleAlertsIntent: AppIntent {
     public func perform() async throws -> some IntentResult {
         let current = SettingsRepository.shared.loadSettings()
         _ = SettingsRepository.shared.updateNotificationsEnabled(!current.notificationsEnabled)
+        NotificationScheduler.shared.syncAlarms(onTimeChanged: false)
         WidgetCenter.shared.reloadAllTimelines()
         return .result()
     }

@@ -373,7 +373,7 @@ fun MainScreen(
 
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                text = AppStrings.blackoutHoursHeader(lang),
+                                text = if (selectedDayTab == "tomorrow") AppStrings.blackoutHoursTomorrowHeader(lang) else AppStrings.blackoutHoursHeader(lang),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xB3BAE6FD)

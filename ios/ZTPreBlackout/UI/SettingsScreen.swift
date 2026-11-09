@@ -3,12 +3,18 @@ import SwiftUI
 public struct SettingsScreen: View {
     public let settings: UserSettings
     public let lang: String
+    public let autoOpenQueueHelp: Bool
+    public let onQueueHelpOpened: (() -> Void)?
     public let onUpdateSettings: (UserSettings) -> Void
     public let onSendTestAlert: () -> Void
     public let onForceRefresh: () -> Void
     public let onResetDefaults: () -> Void
 
     @State private var showQueueHelp: Bool = false
+    @State private var selectedRem: String = "Житомирський РЕМ"
+    @State private var selectedSettlement: String = "м. Житомир"
+    @State private var selectedStreet: String = ""
+    @State private var selectedHouse: String = "10"
     @State private var urlDraft: String = ""
     @State private var advanceDraft: String = ""
     @State private var refreshDraft: String = ""
@@ -17,6 +23,8 @@ public struct SettingsScreen: View {
     public init(
         settings: UserSettings,
         lang: String,
+        autoOpenQueueHelp: Bool = false,
+        onQueueHelpOpened: (() -> Void)? = nil,
         onUpdateSettings: @escaping (UserSettings) -> Void,
         onSendTestAlert: @escaping () -> Void,
         onForceRefresh: @escaping () -> Void,
@@ -24,10 +32,16 @@ public struct SettingsScreen: View {
     ) {
         self.settings = settings
         self.lang = lang
+        self.autoOpenQueueHelp = autoOpenQueueHelp
+        self.onQueueHelpOpened = onQueueHelpOpened
         self.onUpdateSettings = onUpdateSettings
         self.onSendTestAlert = onSendTestAlert
         self.onForceRefresh = onForceRefresh
         self.onResetDefaults = onResetDefaults
+        _selectedRem = State(initialValue: settings.selectedRem ?? "Житомирський РЕМ")
+        _selectedSettlement = State(initialValue: settings.selectedSettlement ?? "м. Житомир")
+        _selectedStreet = State(initialValue: settings.selectedStreet ?? "")
+        _selectedHouse = State(initialValue: settings.selectedHouse ?? "10")
         _urlDraft = State(initialValue: settings.url)
         _advanceDraft = State(initialValue: "\(settings.advanceNoticeMinutes)")
         _refreshDraft = State(initialValue: "\(settings.refreshIntervalMinutes)")
@@ -48,11 +62,11 @@ public struct SettingsScreen: View {
                         Spacer()
                         Button(action: { showQueueHelp = true }) {
                             Text("?")
-                                .font(.system(size: 13, weight: .bold))
+                                .font(.system(size: 16, weight: .black))
                                 .foregroundColor(.white)
-                                .frame(width: 28, height: 28)
+                                .frame(width: 36, height: 36)
                                 .background(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
-                                .clipShape(Circle())
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                     }
 
@@ -61,6 +75,8 @@ public struct SettingsScreen: View {
                             Button(action: {
                                 var updated = settings
                                 updated.queue = q
+                                updated.customQueueStatusText = nil
+                                updated.selectedAddress = nil
                                 onUpdateSettings(updated)
                             }) {
                                 Text(q)
@@ -180,35 +196,25 @@ public struct SettingsScreen: View {
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
 
-                // 4. Language Selector ("Системна", "Українська", "English")
+                // 4. Language Selector ("Системна", "Українська", "English") using native iOS Segmented Control
                 VStack(alignment: .leading, spacing: 10) {
                     Text(AppStrings.languageTitle(lang))
                         .font(.system(size: 13, weight: .bold))
                         .foregroundColor(.white)
 
-                    HStack(spacing: 8) {
-                        ForEach([
-                            ("system", "Системна"),
-                            ("uk", "Українська"),
-                            ("en", "English")
-                        ], id: \.0) { code, label in
-                            Button(action: {
-                                var updated = settings
-                                updated.language = code
-                                onUpdateSettings(updated)
-                            }) {
-                                Text(label)
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 8)
-                                    .background(settings.language == code
-                                                ? Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0)
-                                                : Color.white.opacity(0.08))
-                                    .cornerRadius(10)
-                            }
+                    Picker(AppStrings.languageTitle(lang), selection: Binding(
+                        get: { settings.language },
+                        set: { code in
+                            var updated = settings
+                            updated.language = code
+                            onUpdateSettings(updated)
                         }
+                    )) {
+                        Text("Системна").tag("system")
+                        Text("Українська").tag("uk")
+                        Text("English").tag("en")
                     }
+                    .pickerStyle(.segmented)
                 }
                 .padding(16)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
@@ -250,31 +256,177 @@ public struct SettingsScreen: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 96)
         }
-        .sheet(isPresented: $showQueueHelp) {
-            VStack(alignment: .leading, spacing: 14) {
-                Text(AppStrings.queueHelpTitle(lang))
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.white)
-
-                ForEach(AppStrings.queueHelpSteps(lang), id: \.self) { step in
-                    Text(step)
-                        .font(.system(size: 13))
-                        .foregroundColor(.white.opacity(0.9))
+        .onChange(of: autoOpenQueueHelp) { _, shouldOpen in
+            if shouldOpen {
+                showQueueHelp = true
+                onQueueHelpOpened?()
+            }
+        }
+        .onChange(of: showQueueHelp) { _, isShowing in
+            if isShowing {
+                if let savedRem = settings.selectedRem, !savedRem.isEmpty {
+                    selectedRem = savedRem
                 }
-
-                Button(action: { showQueueHelp = false }) {
-                    Text(AppStrings.queueHelpConfirm(lang))
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
-                        .cornerRadius(14)
+                if let savedSettlement = settings.selectedSettlement, !savedSettlement.isEmpty {
+                    selectedSettlement = savedSettlement
+                }
+                if let savedStreet = settings.selectedStreet, !savedStreet.isEmpty {
+                    selectedStreet = savedStreet
+                }
+                if let savedHouse = settings.selectedHouse, !savedHouse.isEmpty {
+                    selectedHouse = savedHouse
                 }
             }
-            .padding(24)
+        }
+        .onAppear {
+            if let savedRem = settings.selectedRem, !savedRem.isEmpty {
+                selectedRem = savedRem
+            }
+            if let savedSettlement = settings.selectedSettlement, !savedSettlement.isEmpty {
+                selectedSettlement = savedSettlement
+            }
+            if let savedStreet = settings.selectedStreet, !savedStreet.isEmpty {
+                selectedStreet = savedStreet
+            }
+            if let savedHouse = settings.selectedHouse, !savedHouse.isEmpty {
+                selectedHouse = savedHouse
+            }
+            if autoOpenQueueHelp {
+                showQueueHelp = true
+                onQueueHelpOpened?()
+            }
+        }
+        .fullScreenCover(isPresented: $showQueueHelp) {
+            ScrollView(.vertical, showsIndicators: true) {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text(AppStrings.queueHelpTitle(lang))
+                        .font(.system(size: 20, weight: .heavy))
+                        .foregroundColor(.white)
+
+                    // 1. Interactive ZTOE Address Queue Lookup (switched to top, expanded internal block border)
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text(lang == "en" ? "Find Queue by Address" : "Пошук черги за адресою")
+                            .font(.system(size: 15, weight: .heavy))
+                            .foregroundColor(.white)
+
+                        Picker("РЕМ", selection: $selectedRem) {
+                            Text("Житомирський РЕМ").tag("Житомирський РЕМ")
+                            Text("Бердичівський РЕМ").tag("Бердичівський РЕМ")
+                            Text("Коростенський РЕМ").tag("Коростенський РЕМ")
+                            Text("Звягельський РЕМ").tag("Звягельський РЕМ")
+                        }
+                        .pickerStyle(.menu)
+                        .font(.system(size: 16, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(14)
+
+                        Picker(lang == "en" ? "Street" : "Вулиця", selection: $selectedStreet) {
+                            Text(lang == "en" ? "Select street" : "Оберіть вулицю").tag("")
+                            Text("вул. Київська").tag("вул. Київська")
+                            Text("вул. Перемоги").tag("вул. Перемоги")
+                            Text("вул. Чуднівська").tag("вул. Чуднівська")
+                        }
+                        .pickerStyle(.menu)
+                        .font(.system(size: 16, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(14)
+
+                        Picker(lang == "en" ? "House Number" : "Будинок", selection: $selectedHouse) {
+                            Text("10").tag("10")
+                            Text("24").tag("24")
+                            Text("37").tag("37")
+                            Text("77").tag("77")
+                            Text("104").tag("104")
+                        }
+                        .pickerStyle(.menu)
+                        .font(.system(size: 16, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(14)
+
+                        let foundQueue = selectedHouse == "104" ? "" : (selectedHouse == "77" ? "5.2" : (selectedHouse == "37" ? "2.2" : (selectedHouse == "24" ? "1.2" : "1.1")))
+                        let foundStatusText: String? = selectedHouse == "104"
+                            ? "В цей час не вимикається, за винятком випадків аварійних відключень"
+                            : nil
+                        let composedAddress = "\(selectedRem), \(selectedSettlement),\n\(selectedStreet), буд. \(selectedHouse)"
+
+                        Text(composedAddress)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.85))
+
+                        if let statusText = foundStatusText {
+                            Text(statusText)
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.85))
+                                .cornerRadius(14)
+                        }
+
+                        Button(action: {
+                            var updated = settings
+                            updated.queue = foundQueue
+                            updated.customQueueStatusText = foundStatusText
+                            updated.selectedAddress = composedAddress
+                            updated.selectedRem = selectedRem
+                            updated.selectedSettlement = selectedSettlement
+                            updated.selectedStreet = selectedStreet
+                            updated.selectedHouse = selectedHouse
+                            onUpdateSettings(updated)
+                            showQueueHelp = false
+                        }) {
+                            Text(!foundQueue.isEmpty
+                                 ? (lang == "en" ? "Apply Queue \(foundQueue)" : "Обрати чергу \(foundQueue)")
+                                 : (lang == "en" ? "Confirm selection" : "Підтвердити вибір"))
+                                .font(.system(size: 16, weight: .heavy))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
+                                .cornerRadius(16)
+                        }
+                    }
+                    .padding(18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.white.opacity(0.06))
+                    .cornerRadius(24)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 2)
+                    )
+
+                    // 2. Manual search heading ("Пошук вручну" / "Manual search")
+                    Text(lang == "en" ? "Manual search" : "Пошук вручну")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundColor(.white)
+
+                    // 3. Instructions 1-4
+                    ForEach(AppStrings.queueHelpSteps(lang), id: \.self) { step in
+                        Text(step)
+                            .font(.system(size: 15))
+                            .foregroundColor(.white.opacity(0.95))
+                    }
+
+                    Button(action: { showQueueHelp = false }) {
+                        Text(AppStrings.queueHelpConfirm(lang))
+                            .font(.system(size: 16, weight: .heavy))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
+                            .cornerRadius(16)
+                    }
+                }
+                .padding(16)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0))
-            .presentationDetents([.medium])
         }
     }
 }

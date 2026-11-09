@@ -26,7 +26,8 @@ object AppStrings {
     fun nextPeriod(lang: String) = if (lang == "uk") "Найближчий період:" else "Next period:"
     fun today(lang: String) = if (lang == "uk") "Сьогодні" else "Today"
     fun tomorrow(lang: String) = if (lang == "uk") "Завтра" else "Tomorrow"
-    fun blackoutHoursHeader(lang: String) = if (lang == "uk") "ГОДИНИ БЕЗ СВІТЛА НА ЦЕЙ ДЕНЬ:" else "BLACKOUT HOURS FOR TODAY:"
+    fun blackoutHoursHeader(lang: String) = if (lang == "uk") "ГОДИНИ ВІДКЛЮЧЕНЬ НА СЬОГОДНІ:" else "BLACKOUT HOURS FOR TODAY:"
+    fun blackoutHoursTomorrowHeader(lang: String) = if (lang == "uk") "ГОДИНИ ВІДКЛЮЧЕНЬ НА ЗАВТРА:" else "BLACKOUT HOURS FOR TOMORROW:"
     fun noBlackoutsScheduled(lang: String) = if (lang == "uk") "Відключень не заплановано" else "No blackouts scheduled"
     fun hourShort(lang: String) = if (lang == "uk") "год" else "h"
     fun lastUpdated(lang: String) = if (lang == "uk") "Останнє оновлення:" else "Last updated:"
@@ -36,7 +37,7 @@ object AppStrings {
     fun errorNoQueuesFound(lang: String) = if (lang == "uk") "На сайті не знайдено черг" else "No queues found on site"
     fun emergencyOutagesLabel(lang: String) = if (lang == "uk") "Інформація про аварійні відключення:" else "Emergency outages info:"
     const val EMERGENCY_OUTAGES_URL = "https://www.facebook.com/ztoe.com.ua"
-    fun siteSchedulesLabel(lang: String) = "Графіки відключень на сайті"
+    fun siteSchedulesLabel(lang: String) = if (lang == "uk") "Графіки відключень на сайті" else "Blackout schedules on website"
     const val SITE_SCHEDULES_URL = "https://www.ztoe.com.ua/unhooking-search.php"
 
     // Settings Screen Texts
@@ -70,14 +71,14 @@ object AppStrings {
     fun queueHelpTitle(lang: String) = if (lang == "uk") "Як дізнатися свою чергу" else "How to find your queue"
     fun queueHelpSteps(lang: String): List<String> = if (lang == "uk") {
         listOf(
-            "1. Відкрийте сторінку пошуку черги на сайті https://www.ztoe.com.ua/unhooking-search.php.",
+            "1. Відкрийте сторінку пошуку черги на сайті https://www.ztoe.com.ua/unhooking-search.php",
             "2. Оберіть свій РЕМ, населений пункт і вулицю.",
             "3. У таблиці знайдіть свій будинок і подивіться стовпці «Черга» і «Підчерга». Наприклад, черга 5 і підчерга 2 - це 5.2.",
             "4. Виберіть це значення у полі «Черга» у вікні налаштувань (кнопка ⚙)."
         )
     } else {
         listOf(
-            "1. Open the queue lookup page on https://www.ztoe.com.ua/unhooking-search.php.",
+            "1. Open the queue lookup page on https://www.ztoe.com.ua/unhooking-search.php",
             "2. Select your distribution district (РЕМ), settlement, and street.",
             "3. In the table, find your building and check the «Queue» and «Subqueue» columns. For example, queue 5 and subqueue 2 is 5.2.",
             "4. Select this value in the «Queue» field in the Settings window (⚙ button)."

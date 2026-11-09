@@ -33,7 +33,11 @@ public enum AppStrings {
     }
 
     public static func blackoutHoursForDayHeader(_ lang: String) -> String {
-        lang == "en" ? "BLACKOUT HOURS FOR TODAY:" : "ГОДИНИ БЕЗ СВІТЛА НА ЦЕЙ ДЕНЬ:"
+        lang == "en" ? "BLACKOUT HOURS FOR TODAY:" : "ГОДИНИ ВІДКЛЮЧЕНЬ НА СЬОГОДНІ:"
+    }
+
+    public static func blackoutHoursForTomorrowHeader(_ lang: String) -> String {
+        lang == "en" ? "BLACKOUT HOURS FOR TOMORROW:" : "ГОДИНИ ВІДКЛЮЧЕНЬ НА ЗАВТРА:"
     }
 
     public static func emergencyOutagesLabel(_ lang: String) -> String {
@@ -90,6 +94,10 @@ public enum AppStrings {
         lang == "en"
             ? "Data loaded directly from ztoe.com.ua. App is not an official service of JSC Zhytomyroblenergo and is not responsible for sudden emergency cuts."
             : "Дані про графіки завантажуються безпосередньо з сайту ztoe.com.ua. Застосунок не є офіційним сервісом АТ «Житомиробленерго» та не несе відповідальності за раптові зміни або аварійні відключення з боку НЕК «Укренерго»."
+    }
+
+    public static func privacyPolicyButton(_ lang: String) -> String {
+        lang == "en" ? "Privacy Policy" : "Політика конфіденційності"
     }
 
     public static func queueHelpTitle(_ lang: String) -> String {

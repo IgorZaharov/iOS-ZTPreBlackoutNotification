@@ -141,13 +141,13 @@ fun SettingsScreen(
                         )
                         Box(
                             modifier = Modifier
-                                .size(22.dp)
-                                .clip(CircleShape)
-                                .background(Color(0x26FFFFFF))
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0xFFFF5E3A))
                                 .clickable { showQueueHelpDialog = true },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("?", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("?", fontSize = 15.sp, fontWeight = FontWeight.Black, color = Color.White)
                         }
                     }
                 }

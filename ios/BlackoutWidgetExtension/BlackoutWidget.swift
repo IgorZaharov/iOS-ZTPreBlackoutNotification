@@ -31,8 +31,32 @@ public struct BlackoutWidgetProvider: TimelineProvider {
     private func makeEntry(for now: Date) -> BlackoutWidgetEntry {
         let settings = SettingsRepository.shared.loadSettings()
         let lang = AppStrings.resolveLanguage(settings.language)
-        let todaySlots = ScheduleRepository.shared.getTodaySlots(queue: settings.queue, now: now)
-        let tomorrowSlots = ScheduleRepository.shared.getTomorrowSlots(queue: settings.queue, now: now)
+        let rawTodaySlots = ScheduleRepository.shared.getTodaySlots(queue: settings.queue, now: now)
+        let rawTomorrowSlots = ScheduleRepository.shared.getTomorrowSlots(queue: settings.queue, now: now)
+        let todaySlots = ScheduleRepository.shared.applyEmergencyOutageToSlots(
+            slots: rawTodaySlots,
+            startTime: settings.activeEmergencyOutageStart,
+            restoreTime: settings.activeEmergencyOutageRestore,
+            isTomorrow: false
+        )
+        let tomorrowSlots: [BlackoutSlot]? = {
+            if let tom = rawTomorrowSlots {
+                return ScheduleRepository.shared.applyEmergencyOutageToSlots(
+                    slots: tom,
+                    startTime: settings.activeEmergencyOutageStart,
+                    restoreTime: settings.activeEmergencyOutageRestore,
+                    isTomorrow: true
+                )
+            } else if settings.activeEmergencyOutageStart != nil {
+                return ScheduleRepository.shared.applyEmergencyOutageToSlots(
+                    slots: [],
+                    startTime: settings.activeEmergencyOutageStart,
+                    restoreTime: settings.activeEmergencyOutageRestore,
+                    isTomorrow: true
+                )
+            }
+            return nil
+        }()
         let statusInfo = ScheduleRepository.shared.calculateStatusAndCountdown(
             slots: todaySlots,
             tomorrowSlots: tomorrowSlots,

@@ -11,12 +11,12 @@ public enum KyivZone {
         return TimeZone.current
     }()
 
-    public static var calendar: Calendar {
+    public static let calendar: Calendar = {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = timeZone
         cal.locale = Locale(identifier: "uk_UA")
         return cal
-    }
+    }()
 
     public static func todayIsoString(now: Date = Date()) -> String {
         let comps = calendar.dateComponents([.year, .month, .day], from: now)

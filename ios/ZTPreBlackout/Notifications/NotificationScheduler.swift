@@ -32,7 +32,13 @@ public final class NotificationScheduler {
         let center = UNUserNotificationCenter.current()
         let previousIds = defaults.stringArray(forKey: Self.SCHEDULED_IDS_KEY) ?? []
 
-        let slots = ScheduleRepository.shared.getTodaySlots(queue: settings.queue, now: now)
+        let rawSlots = ScheduleRepository.shared.getTodaySlots(queue: settings.queue, now: now)
+        let slots = ScheduleRepository.shared.applyEmergencyOutageToSlots(
+            slots: rawSlots,
+            startTime: settings.activeEmergencyOutageStart,
+            restoreTime: settings.activeEmergencyOutageRestore,
+            isTomorrow: false
+        )
         let intervals = ScheduleRepository.shared.getDetailedIntervals(slots: slots)
 
         // Protect any active pre-warning in-flight window [alertTime - 1min, blockStartTime + 2min]

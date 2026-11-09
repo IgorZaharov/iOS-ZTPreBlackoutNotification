@@ -1,6 +1,6 @@
 {
-  "summary":  "Step-by-step implementation plan for the iOS port of Світло в Житомирі (iOS-ZTPreBlackoutNotification) with 100% feature, UI, color, and unit test parity with Android-ZTBlackoutPreWarning v1.3.3, targeting iOS 17.0+ with interactive WidgetKit AppIntents, GitHub Actions IPA CI/CD, and the 5-tab Web Simulator & Developer Workbench.",
-  "updatedAt":  "2026-11-09T16:25:49.362821278Z",
+  "summary":  "Implementation plan for fixing iOS bugs, emergency outage persistence across App and Widget, battery drain from foreground timers and animations, regex/calendar allocation overhead, cache bounding, midnight day rollover, and Web Simulator parity with unit tests.",
+  "updatedAt":  "2026-11-09T22:31:13.284601060Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

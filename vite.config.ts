@@ -54,6 +54,12 @@ export default defineConfig(() => {
           changeOrigin: true,
           secure: false,
           rewrite: (p) => p.replace(/^\/proxy-ztoe/, '')
+        },
+        '/proxy-ztoe-poweron': {
+          target: 'https://api-ztoe-poweron.inneti.net',
+          changeOrigin: true,
+          secure: false,
+          rewrite: (p) => p.replace(/^\/proxy-ztoe-poweron/, '')
         }
       }
     },

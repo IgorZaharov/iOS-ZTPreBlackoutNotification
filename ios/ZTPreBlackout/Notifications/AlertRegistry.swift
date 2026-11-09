@@ -8,15 +8,26 @@ public final class AlertRegistry {
         UserDefaults(suiteName: ScheduleRepository.APP_GROUP_ID) ?? .standard
     }
 
+    public static let MAX_STORED_ENTRIES = 100
+
     public func hasNotified(slotId: String) -> Bool {
         let set = Set(defaults.stringArray(forKey: Self.PREFS_KEY) ?? [])
         return set.contains(slotId)
     }
 
-    public func markNotified(slotId: String) {
-        var set = Set(defaults.stringArray(forKey: Self.PREFS_KEY) ?? [])
-        set.insert(slotId)
-        defaults.set(Array(set), forKey: Self.PREFS_KEY)
+    public func markNotified(slotId: String, now: Date = Date()) {
+        let todayStr = KyivZone.todayIsoString(now: now)
+        let tomorrowStr = KyivZone.tomorrowIsoString(now: now)
+        var list = (defaults.stringArray(forKey: Self.PREFS_KEY) ?? []).filter { id in
+            !id.hasPrefix("block_") || id.hasPrefix("block_\(todayStr)_") || id.hasPrefix("block_\(tomorrowStr)_")
+        }
+        if !list.contains(slotId) {
+            list.append(slotId)
+        }
+        if list.count > Self.MAX_STORED_ENTRIES {
+            list = Array(list.suffix(Self.MAX_STORED_ENTRIES))
+        }
+        defaults.set(list, forKey: Self.PREFS_KEY)
     }
 
     public func resetFutureSlotsOnTimeChange(queue: String, todayStr: String, currentMinuteOfDay: Int, advanceNoticeMinutes: Int) {
