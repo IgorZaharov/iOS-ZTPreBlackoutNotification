@@ -2247,10 +2247,13 @@ function runUnitTestD_iOSParity() {
     'ios/ZTPreBlackout/UI/BlackoutAppNavigation.swift',
     'ios/ZTPreBlackout/ZTPreBlackoutApp.swift',
     'ios/ZTPreBlackout/Info.plist',
+    'ios/ZTPreBlackout/Info.plist',
+    'ios/ZTPreBlackout/PrivacyInfo.xcprivacy',
     'ios/ZTPreBlackout/ZTPreBlackout.entitlements',
     'ios/BlackoutWidgetExtension/WidgetIntents.swift',
     'ios/BlackoutWidgetExtension/BlackoutWidget.swift',
     'ios/BlackoutWidgetExtension/Info.plist',
+    'ios/BlackoutWidgetExtension/PrivacyInfo.xcprivacy',
     'ios/BlackoutWidgetExtension/BlackoutWidgetExtension.entitlements',
     'ios/ZTPreBlackoutTests/ZtoeParserTests.swift',
     'ios/Resources/donations.json',
@@ -2275,8 +2278,9 @@ function runUnitTestD_iOSParity() {
       projectYml.includes('MARKETING_VERSION: "1.3.3"') &&
       projectYml.includes('ZTPreBlackout:') &&
       projectYml.includes('BlackoutWidgetExtension:') &&
-      projectYml.includes('ZTPreBlackoutTests:'),
-    'ios/project.yml must configure iOS 17.0, MARKETING_VERSION 1.3.3, ZTPreBlackout, BlackoutWidgetExtension, and ZTPreBlackoutTests'
+      projectYml.includes('ZTPreBlackoutTests:') &&
+      projectYml.includes('PrivacyInfo.xcprivacy'),
+    'ios/project.yml must configure iOS 17.0, MARKETING_VERSION 1.3.3, ZTPreBlackout, BlackoutWidgetExtension, ZTPreBlackoutTests, and PrivacyInfo.xcprivacy'
   );
 
   // Verify KyivZone.swift fallback from Europe/Kyiv to Europe/Kiev
@@ -2306,6 +2310,67 @@ function runUnitTestD_iOSParity() {
     'AppStrings.swift and Models.swift must preserve all critical localization strings, timer defaults (15 / 30), and Roulette constants'
   );
 
+  // Verify About screen cleanup & Apple Guideline 2.3.10 (no "Google Play Store Ready", no "Jetpack Compose M3", no "Android" in descriptions)
+  const aboutViewTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/AboutView.tsx'), 'utf-8');
+  const aboutScreenKt = fs.readFileSync(
+    path.join(ROOT_DIR, 'android/app/src/main/java/ua/blackout/prewarning/ui/screens/AboutScreen.kt'),
+    'utf-8'
+  );
+  const aboutScreenSwift = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/ZTPreBlackout/UI/AboutScreen.swift'),
+    'utf-8'
+  );
+  const i18nTs = fs.readFileSync(path.join(ROOT_DIR, 'src/services/i18n.ts'), 'utf-8');
+  const appStringsKt = fs.readFileSync(
+    path.join(ROOT_DIR, 'android/app/src/main/java/ua/blackout/prewarning/ui/AppStrings.kt'),
+    'utf-8'
+  );
+  const widgetSimTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/WidgetSimulator.tsx'), 'utf-8');
+
+  assert.ok(
+    !aboutViewTsx.includes('Google Play Store Ready') &&
+      !aboutViewTsx.includes('Jetpack Compose') &&
+      !aboutScreenKt.includes('Jetpack Compose') &&
+      !aboutScreenSwift.includes('Google Play Store Ready') &&
+      !aboutScreenSwift.includes('Jetpack Compose') &&
+      !widgetSimTsx.includes('Android Glance'),
+    'About screens and Widget simulator must not contain "Google Play Store Ready", "Jetpack Compose", or "Android Glance"'
+  );
+
+  assert.ok(
+    i18nTs.includes('Мобільний застосунок для своєчасного інформування') &&
+      i18nTs.includes('Mobile application for timely pre-warnings') &&
+      !i18nTs.includes('Android-застосунок для своєчасного') &&
+      !i18nTs.includes('Android application for timely') &&
+      appStringsKt.includes('Застосунок є офіційною мобільною версією') &&
+      appStringsKt.includes('Official mobile version of the desktop') &&
+      !appStringsKt.includes('офіційною Android-версією') &&
+      !appStringsKt.includes('Official Android version') &&
+      appStringsSwift.includes('Мобільний застосунок для своєчасного інформування') &&
+      appStringsSwift.includes('Mobile application for timely pre-warnings'),
+    'App descriptions across i18n.ts, AppStrings.kt, and AppStrings.swift must not contain the word "Android"'
+  );
+
+  // Verify Apple App Store Review Guidelines 5.1.1 (PrivacyInfo.xcprivacy with CA92.1 & Info.plist usage descriptions)
+  const appPrivacyManifest = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/ZTPreBlackout/PrivacyInfo.xcprivacy'),
+    'utf-8'
+  );
+  const widgetPrivacyManifest = fs.readFileSync(
+    path.join(ROOT_DIR, 'ios/BlackoutWidgetExtension/PrivacyInfo.xcprivacy'),
+    'utf-8'
+  );
+  const iosInfoPlist = fs.readFileSync(path.join(ROOT_DIR, 'ios/ZTPreBlackout/Info.plist'), 'utf-8');
+  assert.ok(
+    appPrivacyManifest.includes('NSPrivacyAccessedAPICategoryUserDefaults') &&
+      appPrivacyManifest.includes('CA92.1') &&
+      widgetPrivacyManifest.includes('NSPrivacyAccessedAPICategoryUserDefaults') &&
+      widgetPrivacyManifest.includes('CA92.1') &&
+      iosInfoPlist.includes('NSPhotoLibraryAddUsageDescription') &&
+      iosInfoPlist.includes('ITSAppUsesNonExemptEncryption'),
+    'iOS PrivacyInfo.xcprivacy and Info.plist must comply with Apple App Store Review Guideline 5.1.1'
+  );
+
   // Verify ZtoeParser.swift explicit red color matching and leaf table extraction
   const ztoeParserSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/ZtoeParser.swift'), 'utf-8');
   assert.ok(
@@ -2331,11 +2396,11 @@ function runUnitTestD_iOSParity() {
     'BlackoutWidget.swift must render 20% transparent background, HHг. MMхв. format without seconds, interactive AppIntents, and САЗУ-ИТ bitmap'
   );
 
-  // Verify Emulator 16:10 vertical smartphone aspect ratio (aspect-[10/16]) and scrolling
+  // Verify Emulator real iPhone screen dimensions (393x852 logical points, aspect-[393/852]) and scrolling
   const phoneSimTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/PhoneSimulator.tsx'), 'utf-8');
   assert.ok(
-    phoneSimTsx.includes('aspect-[10/16]') && phoneSimTsx.includes('overflow-y-auto'),
-    'PhoneSimulator.tsx must render smartphone with 16*10 vertical aspect ratio (aspect-[10/16]) and support scrolling'
+    phoneSimTsx.includes('aspect-[393/852]') && phoneSimTsx.includes('overflow-y-auto'),
+    'PhoneSimulator.tsx must render smartphone with real iPhone 393x852 screen proportions (aspect-[393/852]) and support scrolling'
   );
 
   // Verify GitHub Actions build-ipa.yml workflow
@@ -2348,7 +2413,7 @@ function runUnitTestD_iOSParity() {
     '.github/workflows/build-ipa.yml must build unsigned .ipa and support optional signing secrets on macos-14'
   );
 
-  console.log('Unit Test D PASSED: iOS 17.0+ native Swift/SwiftUI/WidgetKit/XCTest port, IPA CI workflow, and 16:10 Emulator verified.');
+  console.log('Unit Test D PASSED: iOS 17.0+ native Swift/SwiftUI/WidgetKit/XCTest port, Apple Guidelines compliance, and iPhone 393x852 Emulator verified.');
 }
 
 function blackoutWidgetWidgetCheck(content: string): boolean {

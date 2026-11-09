@@ -93,11 +93,11 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
   const displayedNotification = imitatedNotification || activeNotification;
 
   return (
-    <div className="relative mx-auto w-[416px] max-w-full rounded-[52px] bg-[#07090E] p-3.5 shadow-[0_25px_60px_rgba(0,0,0,0.8)] ring-1 ring-white/10 select-none">
+    <div className="relative mx-auto w-[415px] max-w-full rounded-[55px] bg-[#07090E] p-[11px] shadow-[0_25px_60px_rgba(0,0,0,0.8)] ring-1 ring-white/15 select-none">
       
-      {/* Phone Screen Canvas in strict 16:10 vertical smartphone aspect ratio (aspect-[10/16]) with full scrolling */}
+      {/* Real iPhone 15/16 Screen Canvas: 393x852 pt logical viewport (aspect-[393/852] = 9:19.5) with smooth scrolling */}
       <div
-        className="relative overflow-hidden rounded-[42px] w-full aspect-[10/16] flex flex-col border border-white/15 text-white transition-colors duration-1000"
+        className="relative overflow-hidden rounded-[46px] w-full aspect-[393/852] flex flex-col border border-white/15 text-white transition-colors duration-1000"
         style={{ backgroundColor: timePalette.primary, transform: 'translateZ(0)' }}
       >
         {/* Primary (60%) blurred atmospheric base layer */}
@@ -130,13 +130,13 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
         {/* Subtle top scrim to guarantee status bar and header contrast across all 4 day phases */}
         <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#0B0C10]/65 via-[#0B0C10]/25 to-transparent pointer-events-none" />
 
-        {/* Status Bar in Strict 24-Hour Clock */}
-        <div className="relative z-30 shrink-0 flex items-center justify-between px-7 pt-4 pb-2 text-[13px] font-semibold text-sky-100">
+        {/* iOS Status Bar (54pt Safe Area Top) in Strict 24-Hour Clock with Dynamic Island */}
+        <div className="relative z-30 shrink-0 h-[50px] flex items-center justify-between px-7 pt-2 text-[13px] font-semibold text-sky-100">
           <div className="tracking-tight font-mono">{currentTimeStr || '19:27'}</div>
           
-          {/* Subtle Camera Notch */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-3 w-4 h-4 rounded-full bg-black ring-1 ring-white/15 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#1A1B20]" />
+          {/* iPhone Dynamic Island */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-2.5 w-[114px] h-[30px] rounded-full bg-black ring-1 ring-white/10 flex items-center justify-end pr-2.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#12131A] ring-1 ring-white/10" />
           </div>
 
           <div className="flex items-center gap-1.5 text-sky-200/80">
@@ -147,7 +147,7 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
 
         {/* Heads-up Notification Toast with Application Icon */}
         {displayedNotification && (
-          <div className="absolute top-12 left-4 right-4 z-[60] animate-slide-down">
+          <div className="absolute top-14 left-4 right-4 z-[60] animate-slide-down">
             <div className="bg-[#141A29]/90 text-white backdrop-blur-2xl rounded-2xl p-4 shadow-2xl border border-white/20 flex items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-xl bg-[#FF5E3A] flex items-center justify-center text-white shrink-0 mt-0.5 shadow-md">

@@ -35,5 +35,11 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Дозвольте збереження картки результату «Житомирської Рулетки» до Фотогалереї. / Allow saving your Zhytomyr Roulette score card image to your Photo Library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Використовується лише для збереження картки результату у Фотогалерею за вашим запитом. / Used only to save your score card image to the Photo Library on your request.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

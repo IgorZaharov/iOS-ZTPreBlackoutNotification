@@ -81,9 +81,6 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
           <span className="px-3 py-1 rounded-full bg-white/10 text-sky-100 font-semibold border border-white/15">
             {CURRENT_BUILD_VERSION}
           </span>
-          <span className="px-3 py-1 rounded-full bg-[#FF5E3A]/20 text-[#FF5E3A] font-semibold border border-[#FF5E3A]/30">
-            Jetpack Compose M3
-          </span>
         </div>
       </div>
 
@@ -235,23 +232,6 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
           lang={lang}
         />
       )}
-
-      {/* Google Play Console Status Card */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-2xl bg-white text-black flex items-center justify-center shrink-0">
-          <Smartphone className="w-5 h-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-xs font-bold text-white truncate">
-            Google Play Store Ready
-          </div>
-          <div className="text-[11px] text-sky-200/80 leading-relaxed">
-            {lang === 'uk' 
-              ? 'Готовий до складання AAB бандлу через GitHub Actions CI.' 
-              : 'Ready to build signed AAB bundle via GitHub Actions CI.'}
-          </div>
-        </div>
-      </div>
 
       {/* Disclaimer */}
       <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center gap-3.5">

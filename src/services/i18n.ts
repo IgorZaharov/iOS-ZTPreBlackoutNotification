@@ -84,7 +84,7 @@ export const translations = {
     aboutVersion: 'Версія',
     aboutAuthor: 'Розробник',
     aboutAuthorName: 'Ігор Захаров (Igor Zaharov)',
-    aboutDesc: 'Мобільний застосунок для Android для своєчасного інформування про планові та аварійні відключення електроенергії в мережах АТ «Житомиробленерго» (ztoe.com.ua). Створено на базі оригінального Windows Desktop додатку UABlackoutPreWarning.',
+    aboutDesc: 'Мобільний застосунок для своєчасного інформування про планові та аварійні відключення електроенергії в мережах АТ «Житомиробленерго» (ztoe.com.ua). Створено на базі оригінального Windows Desktop додатку UABlackoutPreWarning.',
     aboutDesktopNotice: 'Базується на алгоритмі парсингу оригінальної програми для Windows.',
     aboutLinks: 'Посилання на проект',
     aboutDonations: 'Charity / Благодійність і Пожертви',
@@ -94,7 +94,7 @@ export const translations = {
     aboutDisclaimer: 'Додаток використовує відкриті загальнодоступні дані офіційного веб-сайту ztoe.com.ua. Не є офіційним представником компанії.',
 
     // Widget
-    widgetPreviewTitle: 'Віджет робочого столу Android (Glance)',
+    widgetPreviewTitle: 'Віджет робочого столу',
     widgetTapNotice: 'Натискання на віджет відкриває додаток. Кнопка керує сповіщеннями на місці.',
     widgetSize2x1: 'Компактний 2x1',
     widgetSize3x2: 'Розширений 3x2 / 4x2',
@@ -188,7 +188,7 @@ export const translations = {
     aboutVersion: 'Version',
     aboutAuthor: 'Developer',
     aboutAuthorName: 'Igor Zaharov',
-    aboutDesc: 'Native Android application for timely pre-warnings and monitoring of scheduled and emergency electricity blackouts on the Zhytomyroblenergo (ztoe.com.ua) power grid. Rebuilt from the original Windows Desktop UABlackoutPreWarning application.',
+    aboutDesc: 'Mobile application for timely pre-warnings and monitoring of scheduled and emergency electricity blackouts on the Zhytomyroblenergo (ztoe.com.ua) power grid. Rebuilt from the original Windows Desktop UABlackoutPreWarning application.',
     aboutDesktopNotice: 'Built upon the parsing logic and algorithms of the original Windows application.',
     aboutLinks: 'Project Links',
     aboutDonations: 'Charity / Благодійність і Пожертви',
@@ -198,7 +198,7 @@ export const translations = {
     aboutDisclaimer: 'This application uses public schedule information from ztoe.com.ua. Not an official affiliate of the utility company.',
 
     // Widget
-    widgetPreviewTitle: 'Android Home Screen Widget (Glance)',
+    widgetPreviewTitle: 'Home Screen Widget',
     widgetTapNotice: 'Tapping widget opens the app. Button toggles alerts on the spot.',
     widgetSize2x1: 'Compact 2x1',
     widgetSize3x2: 'Expanded 3x2 / 4x2',

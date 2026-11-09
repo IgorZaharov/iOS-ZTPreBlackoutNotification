@@ -19,33 +19,154 @@ public struct AboutScreen: View {
 
     public var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 14) {
-                // App Identity & Version Card
-                VStack(spacing: 6) {
+            VStack(spacing: 16) {
+                // 1. App Identity & Version Card
+                VStack(spacing: 8) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 18)
+                            .fill(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
+                            .frame(width: 60, height: 60)
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+
                     Text(AppStrings.APP_NAME)
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
-                    Text("v\(Self.APP_VERSION) · iOS 17.0+")
-                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                        .foregroundColor(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
+
+                    Text(AppStrings.aboutSubtitle(lang))
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 12)
+
+                    Text("v\(Self.APP_VERSION)")
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(Color.white.opacity(0.10))
+                        .cornerRadius(12)
                 }
-                .padding(18)
+                .padding(20)
                 .frame(maxWidth: .infinity)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
 
-                // Charity / Благодійність і Пожертви Section
+                // 2. App Description Card
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(AppStrings.aboutDescTitle(lang).uppercased())
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+
+                    Text(AppStrings.aboutDescText(lang))
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(red: 0xE2 / 255.0, green: 0xE8 / 255.0, blue: 0xF0 / 255.0))
+                        .lineSpacing(3)
+
+                    Text(AppStrings.aboutDesktopNotice(lang))
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.8))
+                        .lineSpacing(3)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white.opacity(0.06))
+                        .cornerRadius(14)
+                }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
+                .cornerRadius(24)
+
+                // 3. Developer & GitHub Links Card
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(AppStrings.aboutLinksTitle(lang).uppercased())
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+
+                    if let profileUrl = URL(string: "https://github.com/IgorZaharov") {
+                        Link(destination: profileUrl) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(AppStrings.devProfile(lang))
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                    Text("github.com/IgorZaharov")
+                                        .font(.system(size: 10, design: .monospaced))
+                                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right.square")
+                                    .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+                            }
+                            .padding(12)
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(14)
+                        }
+                    }
+
+                    if let readmeUrl = URL(string: AppStrings.ABOUT_GITHUB_README_URL) {
+                        Link(destination: readmeUrl) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(AppStrings.aboutGithubRepoLabel(lang))
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                    Text("github.com/IgorZaharov/Android-ZTBlackoutPreWarning/blob/main/README.md")
+                                        .font(.system(size: 10, design: .monospaced))
+                                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+                                        .lineLimit(1)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right.square")
+                                    .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+                            }
+                            .padding(12)
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(14)
+                        }
+                    }
+
+                    if let issuesUrl = URL(string: AppStrings.ABOUT_ISSUES_URL) {
+                        Link(destination: issuesUrl) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(AppStrings.repoIssues(lang))
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                    Text("github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues")
+                                        .font(.system(size: 10, design: .monospaced))
+                                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+                                        .lineLimit(1)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right.square")
+                                    .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
+                            }
+                            .padding(12)
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(14)
+                        }
+                    }
+                }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
+                .cornerRadius(24)
+
+                // 4. Charity / Благодійність і Пожертви Section (Opens externally in Safari per Apple Guideline 3.2.1(vi))
                 VStack(alignment: .leading, spacing: 10) {
                     Text(AppStrings.donationsSectionTitle(lang))
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.white)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.7))
 
                     ForEach(donations) { item in
                         if let url = URL(string: item.url) {
                             Link(destination: url) {
                                 HStack {
                                     Text(item.title)
-                                        .font(.system(size: 13, weight: .semibold))
+                                        .font(.system(size: 12, weight: .bold))
                                         .foregroundColor(.white)
                                     Spacer()
                                     Image(systemName: "arrow.up.right.square")
@@ -58,54 +179,36 @@ public struct AboutScreen: View {
                         }
                     }
                 }
-                .padding(16)
+                .padding(18)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
 
-                // Zhytomyr Roulette Launch Button (right after Donations block)
+                // 5. Zhytomyr Roulette Launch Button (right after Donations block)
                 Button(action: onOpenRoulette) {
-                    HStack {
-                        Image(systemName: "bolt.fill")
+                    Text(AppStrings.rouletteLaunchButton(lang))
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Color(red: 0xFD / 255.0, green: 0xE6 / 255.0, blue: 0x8A / 255.0))
+                        .frame(maxWidth: .infinity)
+                        .padding(16)
+                        .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
+                        .cornerRadius(24)
+                }
+
+                // 6. Disclaimer Card (Apple Guideline 5.2.2 compliance: independent utility notice)
+                HStack(alignment: .center, spacing: 12) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.orange.opacity(0.20))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "exclamationmark.shield.fill")
                             .foregroundColor(.yellow)
-                        Text(AppStrings.rouletteLaunchButton(lang))
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.white.opacity(0.7))
                     }
-                    .padding(16)
-                    .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.85))
-                    .cornerRadius(24)
+                    Text(AppStrings.disclaimerText(lang))
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.8))
+                        .lineSpacing(2)
                 }
-
-                // Links Card: 1) ZTOE website, 2) Світло в Житомирі на Github (README.md), 3) GitHub Issues
-                VStack(alignment: .leading, spacing: 10) {
-                    if let ztoeUrl = URL(string: AppStrings.DEFAULT_ZTOE_URL) {
-                        Link(destination: ztoeUrl) {
-                            Text("АТ «Житомиробленерго» (ztoe.com.ua)")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                    }
-
-                    if let readmeUrl = URL(string: AppStrings.ABOUT_GITHUB_README_URL) {
-                        Link(destination: readmeUrl) {
-                            Text(AppStrings.aboutGithubRepoLabel(lang))
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                    }
-
-                    if let issuesUrl = URL(string: AppStrings.ABOUT_ISSUES_URL) {
-                        Link(destination: issuesUrl) {
-                            Text("https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.white.opacity(0.85))
-                        }
-                    }
-                }
-                .padding(16)
+                .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)

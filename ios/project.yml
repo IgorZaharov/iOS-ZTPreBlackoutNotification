@@ -22,6 +22,8 @@ targets:
     sources:
       - path: Shared
       - path: ZTPreBlackout
+      - path: ZTPreBlackout/PrivacyInfo.xcprivacy
+        buildPhase: resources
       - path: Resources
         buildPhase: resources
     settings:
@@ -41,6 +43,8 @@ targets:
     sources:
       - path: Shared
       - path: BlackoutWidgetExtension
+      - path: BlackoutWidgetExtension/PrivacyInfo.xcprivacy
+        buildPhase: resources
       - path: Resources/valid-urls.json
         buildPhase: resources
       - path: Resources/donations.json

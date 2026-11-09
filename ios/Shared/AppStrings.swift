@@ -48,8 +48,48 @@ public enum AppStrings {
         "Charity / Благодійність і Пожертви"
     }
 
+    public static func aboutSubtitle(_ lang: String) -> String {
+        lang == "en"
+            ? "Advance blackout alerts for Zhytomyr and region"
+            : "Завчасне інформування про відключення світла в Житомирі та області"
+    }
+
+    public static func aboutDescTitle(_ lang: String) -> String {
+        lang == "en" ? "App Description" : "Опис застосунку"
+    }
+
+    public static func aboutDescText(_ lang: String) -> String {
+        lang == "en"
+            ? "Mobile application for timely pre-warnings about scheduled power outages in Zhytomyr and Zhytomyr Oblast based on official schedules from JSC «Zhytomyroblenergo» (ztoe.com.ua)."
+            : "Мобільний застосунок для своєчасного інформування про планові відключення електроенергії у м. Житомир та Житомирській області на основі офіційних графіків АТ «Житомиробленерго» (ztoe.com.ua)."
+    }
+
+    public static func aboutDesktopNotice(_ lang: String) -> String {
+        lang == "en"
+            ? "Official mobile version of the desktop UA Blackout Pre-Warning project, optimized for background operation with minimal battery drain."
+            : "Застосунок є офіційною мобільною версією проєкту UA Blackout Pre-Warning для ПК, оптимізований для автономної роботи у фоні з мінімальним споживанням батареї."
+    }
+
+    public static func aboutLinksTitle(_ lang: String) -> String {
+        lang == "en" ? "Links & Development" : "Посилання та розробка"
+    }
+
+    public static func devProfile(_ lang: String) -> String {
+        lang == "en" ? "Developer profile" : "Профіль розробника"
+    }
+
     public static func aboutGithubRepoLabel(_ lang: String) -> String {
         "Світло в Житомирі на Github"
+    }
+
+    public static func repoIssues(_ lang: String) -> String {
+        lang == "en" ? "Report an issue (Issues)" : "Повідомити про проблему (Issues)"
+    }
+
+    public static func disclaimerText(_ lang: String) -> String {
+        lang == "en"
+            ? "Data loaded directly from ztoe.com.ua. App is not an official service of JSC Zhytomyroblenergo and is not responsible for sudden emergency cuts."
+            : "Дані про графіки завантажуються безпосередньо з сайту ztoe.com.ua. Застосунок не є офіційним сервісом АТ «Житомиробленерго» та не несе відповідальності за раптові зміни або аварійні відключення з боку НЕК «Укренерго»."
     }
 
     public static func queueHelpTitle(_ lang: String) -> String {

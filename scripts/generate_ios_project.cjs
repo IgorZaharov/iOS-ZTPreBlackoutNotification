@@ -11,6 +11,16 @@ const filesToExpose = [
     description: 'XcodeGen specification for ZTPreBlackout (iOS 17.0+), BlackoutWidgetExtension, and ZTPreBlackoutTests'
   },
   {
+    path: 'ios/ZTPreBlackout/PrivacyInfo.xcprivacy',
+    language: 'xml',
+    description: 'Apple App Store Review Guideline 5.1.1 Privacy Manifest declaring UserDefaults (CA92.1) and zero tracking'
+  },
+  {
+    path: 'ios/ZTPreBlackout/Info.plist',
+    language: 'xml',
+    description: 'iOS Info.plist with BGTaskScheduler identifiers, Photo Library usage descriptions, and encryption declaration'
+  },
+  {
     path: '.github/workflows/build-ipa.yml',
     language: 'yaml',
     description: 'GitHub Actions macOS 14 CI/CD workflow: runs npm test, generates Xcode project, and builds unsigned & signed .ipa'

@@ -104,7 +104,7 @@ export const WidgetSimulator: React.FC<WidgetSimulatorProps> = ({
             </h2>
           </div>
           <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-white/10 text-sky-200 font-mono border border-white/10">
-            {isUk ? 'Віджет Android Glance' : 'Android Glance Widget'}
+            {isUk ? 'Віджет робочого столу' : 'Home Screen Widget'}
           </span>
         </div>
 
