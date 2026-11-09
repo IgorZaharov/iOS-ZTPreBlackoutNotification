@@ -1,0 +1,158 @@
+import Foundation
+
+public enum SlotStatus: String, Codable, Equatable {
+    case POWER_ON
+    case POWER_OFF
+}
+
+public struct BlackoutSlot: Codable, Equatable, Identifiable {
+    public var id: Int { index }
+    public let index: Int
+    public let startMinute: Int
+    public let endMinute: Int
+    public let label: String
+    public let status: SlotStatus
+
+    public init(index: Int, startMinute: Int, endMinute: Int, label: String, status: SlotStatus) {
+        self.index = index
+        self.startMinute = startMinute
+        self.endMinute = endMinute
+        self.label = label
+        self.status = status
+    }
+}
+
+public struct DetailedInterval: Codable, Equatable, Identifiable {
+    public var id: String { "\(startStr)-\(endStr)" }
+    public let startStr: String
+    public let endStr: String
+    public let startMinuteOfDay: Int
+    public let endMinuteOfDay: Int
+    public let durationHours: Double
+
+    public init(
+        startStr: String,
+        endStr: String,
+        startMinuteOfDay: Int,
+        endMinuteOfDay: Int,
+        durationHours: Double
+    ) {
+        self.startStr = startStr
+        self.endStr = endStr
+        self.startMinuteOfDay = startMinuteOfDay
+        self.endMinuteOfDay = endMinuteOfDay
+        self.durationHours = durationHours
+    }
+}
+
+public struct StatusAndCountdown: Equatable {
+    public let isBlackoutNow: Bool
+    public let isUnclear: Bool
+    public let countdownText: String
+    public let nextSlotTime: String
+    public let currentOrNextInterval: DetailedInterval?
+
+    public init(
+        isBlackoutNow: Bool,
+        isUnclear: Bool = false,
+        countdownText: String,
+        nextSlotTime: String,
+        currentOrNextInterval: DetailedInterval? = nil
+    ) {
+        self.isBlackoutNow = isBlackoutNow
+        self.isUnclear = isUnclear
+        self.countdownText = countdownText
+        self.nextSlotTime = nextSlotTime
+        self.currentOrNextInterval = currentOrNextInterval
+    }
+}
+
+public enum FetchStatus: String, Codable, Equatable {
+    case SUCCESS
+    case NO_INTERNET
+    case NO_QUEUES_FOUND
+}
+
+public struct FullScheduleResult: Equatable {
+    public let status: FetchStatus
+    public let todaySchedules: [String: [BlackoutSlot]]
+    public let tomorrowSchedules: [String: [BlackoutSlot]]
+    public let updatedAt: String
+}
+
+public struct UserSettings: Codable, Equatable {
+    public var queue: String
+    public var url: String
+    public var advanceNoticeMinutes: Int
+    public var refreshIntervalMinutes: Int
+    public var notificationsEnabled: Bool
+    public var soundEnabled: Bool
+    public var vibrationEnabled: Bool
+    public var language: String
+    public var theme: String
+
+    public init(
+        queue: String = "1.1",
+        url: String = "https://www.ztoe.com.ua/unhooking-search.php",
+        advanceNoticeMinutes: Int = 15,
+        refreshIntervalMinutes: Int = 30,
+        notificationsEnabled: Bool = true,
+        soundEnabled: Bool = true,
+        vibrationEnabled: Bool = true,
+        language: String = "system",
+        theme: String = "system"
+    ) {
+        self.queue = queue
+        self.url = url
+        self.advanceNoticeMinutes = advanceNoticeMinutes
+        self.refreshIntervalMinutes = refreshIntervalMinutes
+        self.notificationsEnabled = notificationsEnabled
+        self.soundEnabled = soundEnabled
+        self.vibrationEnabled = vibrationEnabled
+        self.language = language
+        self.theme = theme
+    }
+
+    public static let ALL_QUEUES: [String] = [
+        "1.1", "1.2", "2.1", "2.2", "3.1", "3.2",
+        "4.1", "4.2", "5.1", "5.2", "6.1", "6.2"
+    ]
+}
+
+public struct DonationItem: Codable, Equatable, Identifiable {
+    public var id: String { url }
+    public let title: String
+    public let url: String
+
+    public init(title: String, url: String) {
+        self.title = title
+        self.url = url
+    }
+}
+
+public enum RouletteUpgradeId: String, Codable, CaseIterable {
+    case ADDITIONAL_X2 = "additional_x2"
+    case NEIGHBORS_SOCKET = "neighbors_socket"
+    case SECOND_CHANCE = "second_chance"
+    case FERN_FLOWER = "fern_flower"
+    case BLACK_CAT = "black_cat"
+    case NOCTURNAL_CREATURE = "nocturnal_creature"
+    case DEPOSIT_POWER_POINTS = "deposit_power_points"
+    case DAILY_STREAK = "daily_streak"
+    case PERSEVERANCE = "perseverance"
+}
+
+public enum RouletteConstants {
+    public static let MAX_ROULETTE_SCORE: Int = 9_999_999
+    public static let SCORE_SHUFFLE_THRESHOLD: Int = 999
+    public static let TICKET_SHUFFLE_ANIMATION_DURATION_MS: Int64 = 2000
+    public static let TICKET_SHUFFLE_ROW_COUNT: Int = 24
+    public static let TICKET_SCRATCH_REVEAL_THRESHOLD: Double = 0.20
+    public static let GAME_OVER_REALIZATION_DELAY_MS: Int64 = 1000
+    public static let GAME_OVER_MUSIC_FADE_IN_DELAY_MS: Int64 = 2000
+    public static let MUSIC_VOLUME_SCALE: Float = 0.15
+    public static let SCRATCH_VOLUME_SCALE: Float = 0.575
+    public static let SCRATCH_SFX_VOLUME_MULTIPLIER: Float = 0.9
+    public static let FLICKER_SFX_VOLUME_MULTIPLIER: Float = 0.9
+    public static let SCRATCH_SFX_DURATION_MS: Int64 = 336
+}

@@ -1,0 +1,106 @@
+import Foundation
+
+public final class SettingsRepository {
+    public static let shared = SettingsRepository()
+    public static let PREFS_NAME = "zt_user_settings_v1"
+
+    private var defaults: UserDefaults {
+        UserDefaults(suiteName: ScheduleRepository.APP_GROUP_ID) ?? .standard
+    }
+
+    public func readSafeInt(key: String, defaultValue: Int) -> Int {
+        guard let obj = defaults.object(forKey: key) else { return defaultValue }
+        if let intVal = obj as? Int { return intVal }
+        if let numVal = obj as? NSNumber { return numVal.intValue }
+        if let strVal = obj as? String, let parsed = Int(strVal) { return parsed }
+        return defaultValue
+    }
+
+    public func readSafeLong(key: String, defaultValue: Int64) -> Int64 {
+        guard let obj = defaults.object(forKey: key) else { return defaultValue }
+        if let int64Val = obj as? Int64 { return int64Val }
+        if let intVal = obj as? Int { return Int64(intVal) }
+        if let numVal = obj as? NSNumber { return numVal.int64Value }
+        if let strVal = obj as? String, let parsed = Int64(strVal) { return parsed }
+        return defaultValue
+    }
+
+    public func readSafeBoolean(key: String, defaultValue: Bool) -> Bool {
+        guard let obj = defaults.object(forKey: key) else { return defaultValue }
+        if let boolVal = obj as? Bool { return boolVal }
+        if let numVal = obj as? NSNumber { return numVal.boolValue }
+        if let strVal = obj as? String {
+            return strVal.lowercased() == "true" || strVal == "1"
+        }
+        return defaultValue
+    }
+
+    public func readSafeString(key: String, defaultValue: String) -> String {
+        guard let obj = defaults.object(forKey: key) else { return defaultValue }
+        if let strVal = obj as? String { return strVal }
+        return "\(obj)"
+    }
+
+    public func loadSettings() -> UserSettings {
+        let queue = readSafeString(key: "queue", defaultValue: "1.1")
+        let url = readSafeString(key: "city_url", defaultValue: AppStrings.DEFAULT_ZTOE_URL)
+        let advance = min(240, max(1, readSafeInt(key: "advance_notice_minutes", defaultValue: 15)))
+        let refresh = min(240, max(1, readSafeInt(key: "refresh_interval_minutes", defaultValue: 30)))
+        let notificationsEnabled = readSafeBoolean(key: "notifications_enabled", defaultValue: true)
+        let soundEnabled = readSafeBoolean(key: "sound_enabled", defaultValue: true)
+        let vibrationEnabled = readSafeBoolean(key: "vibration_enabled", defaultValue: true)
+        let language = readSafeString(key: "language", defaultValue: "system")
+        let theme = readSafeString(key: "theme", defaultValue: "system")
+
+        return UserSettings(
+            queue: UserSettings.ALL_QUEUES.contains(queue) ? queue : "1.1",
+            url: url,
+            advanceNoticeMinutes: advance,
+            refreshIntervalMinutes: refresh,
+            notificationsEnabled: notificationsEnabled,
+            soundEnabled: soundEnabled,
+            vibrationEnabled: vibrationEnabled,
+            language: language,
+            theme: theme
+        )
+    }
+
+    public func saveSettings(_ settings: UserSettings) {
+        defaults.set(settings.queue, forKey: "queue")
+        defaults.set(settings.url, forKey: "city_url")
+        defaults.set(min(240, max(1, settings.advanceNoticeMinutes)), forKey: "advance_notice_minutes")
+        defaults.set(min(240, max(1, settings.refreshIntervalMinutes)), forKey: "refresh_interval_minutes")
+        defaults.set(settings.notificationsEnabled, forKey: "notifications_enabled")
+        defaults.set(settings.soundEnabled, forKey: "sound_enabled")
+        defaults.set(settings.vibrationEnabled, forKey: "vibration_enabled")
+        defaults.set(settings.language, forKey: "language")
+        defaults.set(settings.theme, forKey: "theme")
+    }
+
+    public func updateNotificationsEnabled(_ enabled: Bool) -> UserSettings {
+        var current = loadSettings()
+        if !enabled {
+            defaults.set(current.soundEnabled, forKey: "prev_sound_enabled")
+            defaults.set(current.vibrationEnabled, forKey: "prev_vibration_enabled")
+            current.notificationsEnabled = false
+            current.soundEnabled = false
+            current.vibrationEnabled = false
+        } else {
+            let prevSound = readSafeBoolean(key: "prev_sound_enabled", defaultValue: true)
+            let prevVibration = readSafeBoolean(key: "prev_vibration_enabled", defaultValue: true)
+            current.notificationsEnabled = true
+            current.soundEnabled = prevSound
+            current.vibrationEnabled = prevVibration
+        }
+        saveSettings(current)
+        return current
+    }
+
+    public func resetDefaults() -> UserSettings {
+        let def = UserSettings()
+        defaults.set(true, forKey: "prev_sound_enabled")
+        defaults.set(true, forKey: "prev_vibration_enabled")
+        saveSettings(def)
+        return def
+    }
+}

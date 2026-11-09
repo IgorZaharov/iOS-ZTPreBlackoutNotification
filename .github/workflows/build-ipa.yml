@@ -1,0 +1,98 @@
+name: Build iOS IPA & Run Unit Tests
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-ios:
+    name: Build Unsigned & Signed iOS IPA (macOS 14 / Xcode 15.4)
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Dependencies & Run Automated Unit Tests
+        run: |
+          npm install
+          npm test
+
+      - name: Generate Xcode Project via XcodeGen
+        working-directory: ios
+        run: |
+          if ! command -v xcodegen &> /dev/null; then
+            brew install xcodegen
+          fi
+          xcodegen generate
+
+      - name: Build Unsigned Release App & Package Unsigned IPA (AltStore / Sideloadly / TrollStore)
+        working-directory: ios
+        run: |
+          xcodebuild clean build \
+            -project iOS-ZTPreBlackoutNotification.xcodeproj \
+            -scheme ZTPreBlackout \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+          mkdir -p build/UnsignedIPA/Payload
+          cp -R build/DerivedData/Build/Products/Release-iphoneos/ZTPreBlackout.app build/UnsignedIPA/Payload/
+          cd build/UnsignedIPA
+          zip -qry ../iOS-ZTPreBlackoutNotification-unsigned.ipa Payload
+
+      - name: Optional Apple Developer Certificate Signing (TestFlight / App Store)
+        if: ${{ secrets.BUILD_CERTIFICATE_BASE64 != '' && secrets.BUILD_PROVISION_PROFILE_BASE64 != '' }}
+        working-directory: ios
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+      - name: Upload Unsigned IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iOS-ZTPreBlackoutNotification-unsigned-ipa
+          path: ios/build/iOS-ZTPreBlackoutNotification-unsigned.ipa
+          if-no-files-found: error
+
+      - name: Publish GitHub Release on Tag Push (v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ios/build/iOS-ZTPreBlackoutNotification-unsigned.ipa
+          generate_release_notes: true
