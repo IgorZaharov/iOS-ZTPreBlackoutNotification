@@ -3170,7 +3170,28 @@ async function runUnitTestE_AddressLookupAndUnsetQueue() {
     'iOS and Web Simulator must persist emergency outages across App/Widget/Notifications, pause 1s timer off Main screen, cache Calendar/Regexes, bound caches, handle midnight rollover, and reschedule BGAppRefreshTask'
   );
 
-  console.log('Unit Test E PASSED: Full unshortened ZTOE status message, "--:--:--" counter placeholder, light drum chart with hours, live address & emergency outage checking, Житомир вул. Київська 37 workbench button, state-change notifications, iOS battery/performance optimizations, and first-launch reset verified.');
+  // Verify ANDROID_UPDATE_SPEC.md exists in repo root and documents all features, fixes, algorithms, and Android mappings
+  const androidSpecPath = path.join(ROOT_DIR, 'ANDROID_UPDATE_SPEC.md');
+  assert.ok(fs.existsSync(androidSpecPath), 'ANDROID_UPDATE_SPEC.md must exist in repository root');
+  const androidSpecContent = fs.readFileSync(androidSpecPath, 'utf-8');
+  assert.ok(
+    androidSpecContent.includes('# Android Port Update Specification (`ANDROID_UPDATE_SPEC.md`)') &&
+      androidSpecContent.includes('Select queue') &&
+      androidSpecContent.includes('Виберіть чергу') &&
+      androidSpecContent.includes('Оберіть вулицю') &&
+      androidSpecContent.includes('5.2 -> 3.2') &&
+      androidSpecContent.includes('applyEmergencyOutageToSchedule') &&
+      androidSpecContent.includes('checkAndTriggerEmergencyOutageAlert') &&
+      androidSpecContent.includes('parseZtoeAddressLookupTableHtml') &&
+      androidSpecContent.includes('matchEmergencyOutageFromAccidentsJson') &&
+      androidSpecContent.includes('Години відключень на сьогодні:') &&
+      androidSpecContent.includes('Години відключень на завтра:') &&
+      androidSpecContent.includes('WorkManager') &&
+      androidSpecContent.includes('BlackoutGlanceWidget.kt'),
+    'ANDROID_UPDATE_SPEC.md must document all UI/UX changes, address lookup & emergency outage algorithms, battery optimizations, and Kotlin/Compose/Glance/WorkManager mappings'
+  );
+
+  console.log('Unit Test E PASSED: Full unshortened ZTOE status message, "--:--:--" counter placeholder, light drum chart with hours, live address & emergency outage checking, Житомир вул. Київська 37 workbench button, state-change notifications, iOS battery/performance optimizations, first-launch reset, and ANDROID_UPDATE_SPEC.md verified.');
 }
 
 function blackoutWidgetWidgetCheck(content: string): boolean {
