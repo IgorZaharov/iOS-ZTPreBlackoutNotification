@@ -233,7 +233,7 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
           )}
         </div>
 
-        {/* Zhytomyr Roulette Full-Screen Overlay (positioned below Android Status Bar, hiding Navigation Bar) */}
+        {/* Zhytomyr Roulette Full-Screen Overlay (positioned below iOS Status Bar, hiding Navigation Bar) */}
         <ZhytomyrRouletteModal
           isOpen={isRouletteOpen}
           onClose={() => setIsRouletteOpen(false)}
@@ -304,7 +304,7 @@ export const PhoneSimulator: React.FC<PhoneSimulatorProps> = ({
           </div>
         )}
 
-        {/* Android Gesture Bar */}
+        {/* iOS Home Indicator Bar */}
         <div className="shrink-0 flex justify-center pb-2 bg-transparent z-10">
           <div className="w-32 h-1 rounded-full bg-white/25" />
         </div>

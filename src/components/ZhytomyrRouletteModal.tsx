@@ -1990,7 +1990,7 @@ export const ZhytomyrRouletteModal: React.FC<ZhytomyrRouletteModalProps> = ({
               isGameBlackoutActive ? 'bg-[#020306]' : ''
             }`}
           >
-            {/* Top Sticky Score Bar with Bigger Font, Extra Life Hearts & Clear Separation from Android Status Bar */}
+            {/* Top Sticky Score Bar with Bigger Font, Extra Life Hearts & Clear Separation from iOS Status Bar */}
             <div className="shrink-0 px-4 py-3 bg-[#0B0F18] border-b border-[#C9A85C]/25 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="flex items-baseline gap-2">

@@ -45,7 +45,7 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
 
   const gitRepoUrl = "https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification";
   const gitActionsUrl = "https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/actions";
-  const gradleBuildCmd = "cd ios && xcodegen generate && xcodebuild -project iOS-ZTPreBlackoutNotification.xcodeproj -scheme ZTPreBlackout -sdk iphoneos build";
+  const xcodeBuildCmd = "cd ios && xcodegen generate && xcodebuild -project iOS-ZTPreBlackoutNotification.xcodeproj -scheme ZTPreBlackout -sdk iphoneos build";
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto select-none pb-12">
@@ -206,7 +206,7 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
           </div>
         </div>
 
-        {/* Step 2: Automated APK Build via GitHub Actions */}
+        {/* Step 2: Automated .IPA Build via GitHub Actions */}
         <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-6 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col justify-between gap-5">
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -215,7 +215,7 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
                   2
                 </span>
                 <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                  {lang === 'uk' ? 'Автоматична збірка .APK (GitHub CI)' : 'Automated Cloud APK Build'}
+                  {lang === 'uk' ? 'Автоматична збірка .IPA (GitHub CI)' : 'Automated Cloud .IPA Build'}
                 </h2>
               </div>
               <span className="text-[11px] font-mono text-[#FF5E3A] font-bold bg-[#FF5E3A]/10 px-2 py-0.5 rounded-full border border-[#FF5E3A]/20">
@@ -225,15 +225,15 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
 
             <p className="text-xs text-sky-200/80 mb-3">
               {lang === 'uk'
-                ? 'Репозиторій повністю налаштований. Робочий процес GitHub Actions автоматично збирає інсталяційний .APK без необхідності встановлювати Android SDK на ваш ПК:'
-                : 'Pre-configured GitHub Actions workflow automatically compiles the installable .APK in the cloud:'}
+                ? 'Репозиторій повністю налаштований. Робочий процес GitHub Actions автоматично збирає інсталяційний .IPA на macOS 14 без необхідності мати Mac локально:'
+                : 'Pre-configured GitHub Actions workflow automatically compiles the installable .IPA on macOS 14 in the cloud:'}
             </p>
 
             <ol className="list-decimal list-inside text-xs text-zinc-300 space-y-2 mb-4 bg-white/[0.04] p-3.5 rounded-2xl border border-white/5">
               <li>
                 {lang === 'uk' ? 'Відкрийте репозиторій ' : 'Open repository '}
                 <a href={gitRepoUrl} target="_blank" rel="noreferrer" className="text-[#FF5E3A] font-semibold underline">
-                  Android-ZTBlackoutPreWarning
+                  iOS-ZTPreBlackoutNotification
                 </a>
               </li>
               <li>
@@ -243,14 +243,14 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
               </li>
               <li>
                 {lang === 'uk' 
-                  ? 'Хмарний білдер скомпілює додаток на Ubuntu з JDK 17.'
-                  : 'Cloud runner executes ./gradlew assembleDebug.'}
+                  ? 'Хмарний білдер скомпілює додаток на macOS 14 з Xcode 15.4 та XcodeGen.'
+                  : 'Cloud runner executes xcodegen generate & xcodebuild on macOS 14.'}
               </li>
               <li>
                 {lang === 'uk' 
                   ? 'У розділі Artifacts завантажте '
                   : 'Download from Artifacts: '}
-                <strong className="text-emerald-400 font-mono">app-debug-apk</strong>.
+                <strong className="text-emerald-400 font-mono">iOS-ZTPreBlackoutNotification-unsigned-ipa</strong>.
               </li>
             </ol>
 
@@ -273,12 +273,12 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
             className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all border border-white/10"
           >
             <ExternalLink className="w-4 h-4 text-[#FF5E3A]" />
-            <span>{lang === 'uk' ? 'Перейти до GitHub Actions (Завантажити APK)' : 'Go to GitHub Actions Artifacts'}</span>
+            <span>{lang === 'uk' ? 'Перейти до GitHub Actions (Завантажити .IPA)' : 'Go to GitHub Actions Artifacts (.IPA)'}</span>
           </a>
         </div>
       </div>
 
-      {/* Step 3: Local Build in Android Studio & Physical Device Testing */}
+      {/* Step 3: Local Build in Xcode & Physical iPhone Testing */}
       <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-6 md:p-8 border border-white/15 shadow-[0_12px_45px_rgba(0,0,0,0.5)] flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -286,7 +286,7 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
               3
             </span>
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-              {lang === 'uk' ? 'Встановлення та Live тест на смартфоні' : 'Physical Device Live Test & Installation'}
+              {lang === 'uk' ? 'Встановлення та Live тест на iPhone' : 'Physical iPhone Live Test & Installation'}
             </h2>
           </div>
           <span className="text-xs text-sky-200/60 font-mono">Live On-Device Testing</span>
@@ -299,12 +299,12 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
               А
             </div>
             <h3 className="font-bold text-white">
-              {lang === 'uk' ? '1. Передача файлу .APK' : '1. Transfer APK to Phone'}
+              {lang === 'uk' ? '1. Встановлення .IPA' : '1. Install .IPA Package'}
             </h3>
             <p className="text-zinc-300 leading-relaxed">
               {lang === 'uk'
-                ? 'Надішліть завантажений файл `app-debug.apk` собі в Telegram («Збережене»), Google Диск або підключіть телефон по USB.'
-                : 'Send app-debug.apk via Telegram Saved Messages, Google Drive, or USB cable.'}
+                ? 'Встановіть завантажений файл .IPA на iPhone через Sideloadly, AltStore, Apple Configurator або TestFlight.'
+                : 'Install the compiled .IPA on your iPhone using Sideloadly, AltStore, Apple Configurator, or TestFlight.'}
             </p>
           </div>
 
@@ -314,12 +314,12 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
               Б
             </div>
             <h3 className="font-bold text-white">
-              {lang === 'uk' ? '2. Дозвіл на встановлення' : '2. Allow Unknown Sources'}
+              {lang === 'uk' ? '2. Профіль розробника' : '2. Developer Profile Trust'}
             </h3>
             <p className="text-zinc-300 leading-relaxed">
               {lang === 'uk'
-                ? 'Натисніть на файл APK у файловому менеджері. Якщо Android запитає, дозвольте «Встановлення невідомих додатків».'
-                : 'Tap the APK file. In Android security settings, allow "Install unknown apps" for the manager.'}
+                ? 'При sideload-встановленні відкрийте Налаштування iOS → Основні → VPN і керування пристроєм та підтвердіть профіль.'
+                : 'When sideloading, open iOS Settings → General → VPN & Device Management and trust your developer profile.'}
             </p>
           </div>
 
@@ -329,12 +329,12 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
               В
             </div>
             <h3 className="font-bold text-white">
-              {lang === 'uk' ? '3. Віджет & Сповіщення' : '3. Widget & Notifications'}
+              {lang === 'uk' ? '3. Віджет WidgetKit & Сповіщення' : '3. WidgetKit & Notifications'}
             </h3>
             <p className="text-zinc-300 leading-relaxed">
               {lang === 'uk'
-                ? 'Запустіть додаток, надайте дозвіл на сповіщення. Довгим тапом на робочому столі додайте віджет «ZT Blackout»!'
-                : 'Open app, grant notification permission. Long-press home screen to place the Glance widget!'}
+                ? 'Запустіть додаток, надайте дозвіл на сповіщення. Довгим тапом на екрані «Додому» додайте віджет «Світло в Житомирі»!'
+                : 'Open app, grant notification permission. Long-press the Home Screen and tap "+" to add the WidgetKit widget!'}
             </p>
           </div>
         </div>
@@ -345,25 +345,25 @@ export const BuildAndDownloadView: React.FC<BuildAndDownloadViewProps> = ({
             <Terminal className="w-4 h-4 text-emerald-400" />
             <span>
               {lang === 'uk' 
-                ? 'Або збірка локально через термінал / Android Studio:' 
-                : 'Or build locally via terminal / Android Studio:'}
+                ? 'Або збірка локально через термінал / Xcode (macOS):' 
+                : 'Or build locally via terminal / Xcode (macOS):'}
             </span>
           </div>
 
           <div className="relative bg-[#0C1019] text-zinc-300 p-3.5 rounded-2xl font-mono text-xs overflow-x-auto border border-white/10 flex items-center justify-between">
-            <code>{gradleBuildCmd}</code>
+            <code>{xcodeBuildCmd}</code>
             <button
-              onClick={() => copyToClipboard(gradleBuildCmd, 'gradle-cmd')}
+              onClick={() => copyToClipboard(xcodeBuildCmd, 'xcode-cmd')}
               className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all flex items-center gap-1 text-[11px]"
             >
-              {copiedKey === 'gradle-cmd' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedKey === 'gradle-cmd' ? 'Скопійовано' : 'Копіювати'}</span>
+              {copiedKey === 'xcode-cmd' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedKey === 'xcode-cmd' ? 'Скопійовано' : 'Копіювати'}</span>
             </button>
           </div>
           <div className="text-[11px] text-zinc-400 mt-1.5 pl-1 font-mono">
             {lang === 'uk'
-              ? 'Результат: app/build/outputs/apk/debug/app-debug.apk'
-              : 'Output: app/build/outputs/apk/debug/app-debug.apk'}
+              ? 'Результат: build/iOS-ZTPreBlackoutNotification-unsigned.ipa'
+              : 'Output: build/iOS-ZTPreBlackoutNotification-unsigned.ipa'}
           </div>
         </div>
       </div>

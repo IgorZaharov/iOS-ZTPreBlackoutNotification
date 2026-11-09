@@ -46,7 +46,7 @@ export default function App() {
   const [activeNotification, setActiveNotification] = useState<NotificationRecord | null>(null);
   
   // Navigation: main top-level mode
-  const [activeMode, setActiveMode] = useState<'app' | 'widget' | 'build' | 'code' | 'playstore'>('app');
+  const [activeMode, setActiveMode] = useState<'app' | 'widget' | 'build' | 'code' | 'appstore'>('app');
   const [phoneTab, setPhoneTab] = useState<'schedule' | 'widget' | 'settings' | 'about'>('schedule');
 
   // Resolved language and theme
@@ -271,7 +271,7 @@ export default function App() {
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>Віджет Glance</span>
+                <span>Віджет WidgetKit</span>
               </button>
 
               <button
@@ -283,7 +283,7 @@ export default function App() {
                 }`}
               >
                 <PackageCheck className="w-3.5 h-3.5" />
-                <span>Збірка & APK</span>
+                <span>Збірка & .IPA</span>
               </button>
 
               <button
@@ -295,19 +295,19 @@ export default function App() {
                 }`}
               >
                 <Code2 className="w-3.5 h-3.5" />
-                <span>Kotlin код</span>
+                <span>Swift код</span>
               </button>
 
               <button
-                onClick={() => setActiveMode('playstore')}
+                onClick={() => setActiveMode('appstore')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  activeMode === 'playstore'
+                  activeMode === 'appstore'
                     ? 'bg-white text-black shadow-md'
                     : 'text-[#8E92A0] hover:text-white'
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Play Store</span>
+                <span>App Store</span>
               </button>
             </div>
 
@@ -374,19 +374,19 @@ export default function App() {
             onClick={() => setActiveMode('build')}
             className={`px-3 py-1.5 rounded-xl font-bold shrink-0 ${activeMode === 'build' ? 'bg-[#FF5E3A] text-white' : 'text-[#8E92A0]'}`}
           >
-            Збірка & APK
+            Збірка & .IPA
           </button>
           <button
             onClick={() => setActiveMode('code')}
             className={`px-3 py-1.5 rounded-xl font-bold shrink-0 ${activeMode === 'code' ? 'bg-white text-black' : 'text-[#8E92A0]'}`}
           >
-            Kotlin
+            Swift
           </button>
           <button
-            onClick={() => setActiveMode('playstore')}
-            className={`px-3 py-1.5 rounded-xl font-bold shrink-0 ${activeMode === 'playstore' ? 'bg-white text-black' : 'text-[#8E92A0]'}`}
+            onClick={() => setActiveMode('appstore')}
+            className={`px-3 py-1.5 rounded-xl font-bold shrink-0 ${activeMode === 'appstore' ? 'bg-white text-black' : 'text-[#8E92A0]'}`}
           >
-            Play Store
+            App Store
           </button>
         </div>
 
@@ -615,13 +615,13 @@ export default function App() {
                     <h3 className="text-xs font-bold uppercase tracking-wider text-sky-200/70">
                       {resolvedLang === 'uk' ? 'Готово до інсталяції' : 'Ready for Installation'}
                     </h3>
-                    <span className="text-[10px] font-mono text-zinc-400">Kotlin M3</span>
+                    <span className="text-[10px] font-mono text-zinc-400">Swift 5.10 / iOS 17+</span>
                   </div>
 
                   <p className="text-xs text-zinc-300 leading-relaxed">
                     {resolvedLang === 'uk'
-                      ? 'Всі вихідні коди Android протестовані. Завантажте готовий архів або запустіть хмарну збірку APK:'
-                      : 'All Android source files verified. Download project zip or build APK in cloud:'}
+                      ? 'Всі вихідні коди iOS протестовані. Завантажте готовий архів або запустіть хмарну збірку .IPA:'
+                      : 'All iOS source files verified. Download project zip or build .IPA in cloud:'}
                   </p>
 
                   <div className="flex items-center gap-2 pt-1">
@@ -630,7 +630,7 @@ export default function App() {
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all shadow-md"
                     >
                       <PackageCheck className="w-4 h-4" />
-                      <span>{resolvedLang === 'uk' ? 'Збірка & Завантажити APK' : 'Build & Get APK'}</span>
+                      <span>{resolvedLang === 'uk' ? 'Збірка & Завантажити .IPA' : 'Build & Get .IPA'}</span>
                     </button>
 
                     <a
@@ -683,7 +683,7 @@ export default function App() {
             <CodeExplorer />
           )}
 
-          {activeMode === 'playstore' && (
+          {activeMode === 'appstore' && (
             <PlayStoreGuide />
           )}
         </main>
@@ -698,7 +698,7 @@ export default function App() {
               </a>
             </div>
             <div className="flex items-center gap-4 text-[11px]">
-              <a href="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues" target="_blank" rel="noreferrer" className="hover:underline text-rose-600 dark:text-rose-400">
+              <a href="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues" target="_blank" rel="noreferrer" className="hover:underline text-rose-600 dark:text-rose-400">
                 Повідомити про проблему (GitHub Issues)
               </a>
               <span>·</span>

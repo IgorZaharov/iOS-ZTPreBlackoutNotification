@@ -129,10 +129,10 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
 
         {/* 2. Світло в Житомирі на Github */}
         <a
-          href="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/blob/main/README.md"
+          href="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/blob/main/README.md"
           target="_blank"
           rel="noopener noreferrer"
-          title="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/blob/main/README.md"
+          title="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/blob/main/README.md"
           className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-all group overflow-hidden"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1 mr-2">
@@ -144,7 +144,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
                 {t.aboutDesktopRepo}
               </div>
               <div className="text-[11px] text-sky-200/70 font-mono truncate">
-                github.com/IgorZaharov/Android-ZTBlackoutPreWarning/blob/main/README.md
+                github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/blob/main/README.md
               </div>
             </div>
           </div>
@@ -153,10 +153,10 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
 
         {/* 3. Project Issues & Requests */}
         <a
-          href="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues"
+          href="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues"
           target="_blank"
           rel="noopener noreferrer"
-          title="https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues"
+          title="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues"
           className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 transition-all group overflow-hidden"
         >
           <div className="flex items-center gap-3.5 min-w-0 flex-1 mr-2">
@@ -168,7 +168,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
                 {t.aboutRepoIssues}
               </div>
               <div className="text-[11px] text-sky-200/70 font-mono truncate">
-                github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues
+                github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues
               </div>
             </div>
           </div>

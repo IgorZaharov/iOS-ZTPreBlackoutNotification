@@ -4,9 +4,9 @@ export interface DonationLink {
 }
 
 export const GITHUB_DONATIONS_URL =
-  'https://raw.githubusercontent.com/IgorZaharov/Android-ZTBlackoutPreWarning/main/donations.json';
+  'https://raw.githubusercontent.com/IgorZaharov/iOS-ZTPreBlackoutNotification/main/ios/Resources/donations.json';
 export const GITHUB_PUBLIC_DONATIONS_URL =
-  'https://raw.githubusercontent.com/IgorZaharov/Android-ZTBlackoutPreWarning/main/public/donations.json';
+  'https://raw.githubusercontent.com/IgorZaharov/iOS-ZTPreBlackoutNotification/main/donations.json';
 
 export const DONATIONS_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000; // 1 time per day (24 hours)
 
@@ -76,11 +76,10 @@ export function getFaviconCandidateUrls(pageUrl: string): string[] {
     }
 
     const candidates = [
-      `https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(rootDomain)}`,
-      ...(rootDomain !== host ? [`https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(host)}`] : []),
       `https://icons.duckduckgo.com/ip3/${host}.ico`,
       ...(rootDomain !== host ? [`https://icons.duckduckgo.com/ip3/${rootDomain}.ico`] : []),
       `https://${host}/favicon.ico`,
+      ...(rootDomain !== host ? [`https://${rootDomain}/favicon.ico`] : []),
     ];
     return Array.from(new Set(candidates));
   } catch {

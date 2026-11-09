@@ -4,9 +4,9 @@ public enum AppStrings {
     public static let APP_NAME = "Світло в Житомирі"
     public static let DEFAULT_ZTOE_URL = "https://www.ztoe.com.ua/unhooking-search.php"
     public static let EMERGENCY_OUTAGES_URL = "https://www.facebook.com/ztoe.com.ua"
-    public static let ABOUT_GITHUB_README_URL = "https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/blob/main/README.md"
+    public static let ABOUT_GITHUB_README_URL = "https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/blob/main/README.md"
     public static let ABOUT_IOS_GITHUB_URL = "https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification"
-    public static let ABOUT_ISSUES_URL = "https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues"
+    public static let ABOUT_ISSUES_URL = "https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues"
 
     public static func resolveLanguage(_ rawLang: String) -> String {
         if rawLang == "uk" || rawLang == "en" {

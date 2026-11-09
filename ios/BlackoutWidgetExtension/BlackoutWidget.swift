@@ -64,7 +64,7 @@ public enum BlackoutWidgetFormatter {
         return lang == "en" ? "\(h)hr. \(m)m." : "\(h)г. \(m)хв."
     }
 
-    // Renders the 720x132 САЗУ-ИТ 24h analog electricity meter bitmap matching BlackoutGlanceWidget.kt
+    // Renders the 720x132 САЗУ-ИТ 24h analog electricity meter bitmap matching TimelineBar.swift
     public static func renderAnalogCounterBitmap(
         slots: [BlackoutSlot],
         isUnclear: Bool,

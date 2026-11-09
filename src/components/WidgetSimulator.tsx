@@ -133,7 +133,7 @@ export const WidgetSimulator: React.FC<WidgetSimulatorProps> = ({
         </div>
       </div>
 
-      {/* Simulated Android Wallpaper Canvas with Windows 11 Flowing Blue Silk Effect */}
+      {/* Simulated iOS Home Screen Wallpaper Canvas with Flowing Blue Silk Effect */}
       <div className="relative rounded-3xl p-6 overflow-hidden bg-[#0A0D14] border border-white/15 shadow-2xl flex flex-col items-center justify-center min-h-[400px]">
         
         {/* Windows 11 Style Azure Silk Ribbon Gradients */}

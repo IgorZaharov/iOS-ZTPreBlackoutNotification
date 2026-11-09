@@ -1831,8 +1831,8 @@ async function runUnitTestC_ZhytomyrRoulette() {
   // Verify About page links: "Світло в Житомирі на Github" (README.md) is 2nd link and Issues is 3rd link
   assert.equal(translations.uk.aboutDesktopRepo, 'Світло в Житомирі на Github');
   assert.equal(translations.en.aboutDesktopRepo, 'Світло в Житомирі на Github');
-  const webReadmeIdx = aboutViewTsx.indexOf('https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/blob/main/README.md');
-  const webIssuesIdx = aboutViewTsx.indexOf('https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning/issues');
+  const webReadmeIdx = aboutViewTsx.indexOf('https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/blob/main/README.md');
+  const webIssuesIdx = aboutViewTsx.indexOf('https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification/issues');
   assert.ok(
     webReadmeIdx !== -1 && webIssuesIdx !== -1 && webReadmeIdx < webIssuesIdx,
     'AboutView.tsx must place "Світло в Житомирі на Github" (README.md) as 2nd link before Issues (3rd link)'
@@ -2326,15 +2326,44 @@ function runUnitTestD_iOSParity() {
     'utf-8'
   );
   const widgetSimTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/WidgetSimulator.tsx'), 'utf-8');
+  const appTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/App.tsx'), 'utf-8');
+  const buildViewTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/BuildAndDownloadView.tsx'), 'utf-8');
+  const codeExplorerTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/CodeExplorer.tsx'), 'utf-8');
+  const appStoreGuideTsx = fs.readFileSync(path.join(ROOT_DIR, 'src/components/PlayStoreGuide.tsx'), 'utf-8');
+  const donationsServiceTs = fs.readFileSync(path.join(ROOT_DIR, 'src/services/donationsService.ts'), 'utf-8');
+  const donationsRepoSwift = fs.readFileSync(path.join(ROOT_DIR, 'ios/Shared/DonationsRepository.swift'), 'utf-8');
+  const indexHtml = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf-8');
+  const metadataJson = fs.readFileSync(path.join(ROOT_DIR, 'metadata.json'), 'utf-8');
 
   assert.ok(
-    !aboutViewTsx.includes('Google Play Store Ready') &&
+    !aboutViewTsx.includes('Google') &&
+      !aboutViewTsx.includes('Android') &&
       !aboutViewTsx.includes('Jetpack Compose') &&
       !aboutScreenKt.includes('Jetpack Compose') &&
-      !aboutScreenSwift.includes('Google Play Store Ready') &&
+      !aboutScreenSwift.includes('Google') &&
+      !aboutScreenSwift.includes('Android') &&
       !aboutScreenSwift.includes('Jetpack Compose') &&
-      !widgetSimTsx.includes('Android Glance'),
-    'About screens and Widget simulator must not contain "Google Play Store Ready", "Jetpack Compose", or "Android Glance"'
+      !appStringsSwift.includes('Android') &&
+      !appStringsSwift.includes('Google') &&
+      !donationsRepoSwift.includes('Android') &&
+      !donationsRepoSwift.includes('google.com') &&
+      !donationsServiceTs.includes('Android') &&
+      !donationsServiceTs.includes('google.com') &&
+      !widgetSimTsx.includes('Android') &&
+      !appTsx.includes('Android') &&
+      !appTsx.includes('Kotlin') &&
+      !appTsx.includes('Glance') &&
+      !appTsx.includes('Play Store') &&
+      !buildViewTsx.includes('Android') &&
+      !buildViewTsx.includes('Google') &&
+      !buildViewTsx.includes('APK') &&
+      !codeExplorerTsx.includes('Android') &&
+      !codeExplorerTsx.includes('Kotlin') &&
+      !appStoreGuideTsx.includes('Google Play') &&
+      !appStoreGuideTsx.includes('Android') &&
+      !indexHtml.includes('Android') &&
+      !metadataJson.includes('Android'),
+    'iOS and Web codebase must not contain any Android, Google, Play Store, Kotlin, Glance, or APK mentions'
   );
 
   assert.ok(

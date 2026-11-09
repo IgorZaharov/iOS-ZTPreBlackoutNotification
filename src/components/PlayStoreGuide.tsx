@@ -13,31 +13,31 @@ const PROMO_IMAGES = [
   {
     id: 1,
     src: '/playstore/playstore_promo_1.png',
-    filename: 'playstore_promo_1.png',
+    filename: 'appstore_promo_1.png',
     title: '1. Візуалізація відключень світла'
   },
   {
     id: 2,
     src: '/playstore/playstore_promo_2.png',
-    filename: 'playstore_promo_2.png',
+    filename: 'appstore_promo_2.png',
     title: '2. Налаштування черги, інтервалів попередження, та автоматичного оновлення при зміні графіків'
   },
   {
     id: 3,
     src: '/playstore/playstore_promo_3.png',
-    filename: 'playstore_promo_3.png',
+    filename: 'appstore_promo_3.png',
     title: '3. Українська та Англійська мови інтерфейсу та окремі налаштування попереджень'
   },
   {
     id: 4,
     src: '/playstore/playstore_promo_4.png',
-    filename: 'playstore_promo_4.png',
+    filename: 'appstore_promo_4.png',
     title: '4. Віджети для головного екрану'
   },
   {
     id: 5,
     src: '/playstore/playstore_promo_5.png',
-    filename: 'playstore_promo_5.png',
+    filename: 'appstore_promo_5.png',
     title: '5. Мінімальне споживання батареї'
   }
 ];
@@ -51,7 +51,7 @@ export const PlayStoreGuide: React.FC = () => {
     setTimeout(() => setCopiedKey(null), 2500);
   };
 
-  const keytoolCmd = `keytool -genkey -v -keystore release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias zt-blackout`;
+  const p12ExportCmd = `base64 -i Certificates.p12 | pbcopy && base64 -i ZTPreBlackout.mobileprovision | pbcopy`;
 
   return (
     <div className="flex flex-col gap-4 p-2 max-w-4xl mx-auto select-none">
@@ -63,20 +63,20 @@ export const PlayStoreGuide: React.FC = () => {
           </div>
           <div>
             <h2 className="text-base font-bold text-white tracking-tight">
-              Google Play Store Publishing Guide & Promo Graphics
+              Apple App Store & TestFlight Publishing Guide & Promo Graphics
             </h2>
             <p className="text-xs text-[#8E92A0]">
-              Рекламні зображення для Google Play Store (1080×1920) та покрокова інструкція публікації
+              Рекламні зображення для App Store та покрокова інструкція публікації в App Store Connect
             </p>
           </div>
         </div>
       </div>
 
-      {/* Google Play Store Promotional Images (1080x1920) */}
+      {/* App Store Promotional Images */}
       <div className="bg-[#1C1D24] rounded-3xl p-5 border border-white/5 shadow-xl flex flex-col gap-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-            Рекламні скріншоти для Google Play Store (1080×1920, 9:16)
+            Рекламні скріншоти для App Store (9:16)
           </h3>
           <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
             5 PNG готові до завантаження
@@ -112,49 +112,49 @@ export const PlayStoreGuide: React.FC = () => {
         </div>
       </div>
 
-      {/* Step 1: Keystore */}
+      {/* Step 1: Apple Distribution Certificate & Provisioning Profile */}
       <div className="bg-[#1C1D24] rounded-3xl p-5 border border-white/5 shadow-xl flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
           <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">
             1
           </span>
           <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-            Генерація Release Keystore для підпису AAB/APK
+            Підготовка сертифіката Apple Distribution (.p12) та Provisioning Profile
           </h3>
         </div>
         <p className="text-xs text-zinc-300">
-          Для завантаження в Google Play потрібен цифровий ключ підпису (Android App Bundle). Згенеруйте його за допомогою утиліти keytool:
+          Для підписання релізного .IPA для TestFlight та App Store закодуйте сертифікат розповсюдження та профіль у Base64:
         </p>
         <div className="relative bg-[#121316] text-zinc-300 p-3.5 rounded-2xl font-mono text-[11px] overflow-x-auto border border-white/5">
-          <code>{keytoolCmd}</code>
+          <code>{p12ExportCmd}</code>
           <button
-            onClick={() => copyToClipboard(keytoolCmd, 'keytool')}
+            onClick={() => copyToClipboard(p12ExportCmd, 'p12cmd')}
             className="absolute top-2.5 right-2.5 p-1.5 rounded-xl bg-white text-black text-xs flex items-center gap-1 font-bold shadow-md hover:bg-zinc-200 transition-all"
           >
-            {copiedKey === 'keytool' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedKey === 'p12cmd' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
         </div>
         <div className="text-[11px] text-[#FF5E3A] bg-[#FF5E3A]/10 p-3 rounded-2xl border border-[#FF5E3A]/20">
-          Завантажте файл <code className="font-mono font-bold">release-key.jks</code> та паролі як GitHub Secrets (<code className="font-mono">SIGNING_KEY_BASE64</code>, <code className="font-mono">KEY_ALIAS</code>, <code className="font-mono">KEY_PASSWORD</code>, <code className="font-mono">STORE_PASSWORD</code>). Наш CI/CD автоматично збере підписаний AAB!
+          Додайте секрети в GitHub Actions (<code className="font-mono">BUILD_CERTIFICATE_BASE64</code>, <code className="font-mono">P12_PASSWORD</code>, <code className="font-mono">BUILD_PROVISION_PROFILE_BASE64</code>, <code className="font-mono">APPLE_TEAM_ID</code>). Робочий процес автоматично збере підписаний .IPA!
         </div>
       </div>
 
-      {/* Step 2: Google Play Console Account */}
+      {/* Step 2: App Store Connect */}
       <div className="bg-[#1C1D24] rounded-3xl p-5 border border-white/5 shadow-xl flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
           <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">
             2
           </span>
           <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-            Створення додатку в Google Play Console
+            Створення застосунку в App Store Connect
           </h3>
         </div>
         <ol className="list-decimal list-inside text-xs text-zinc-300 space-y-2">
-          <li>Увійдіть в <a href="https://play.google.com/console" target="_blank" rel="noreferrer" className="text-[#FF5E3A] underline font-semibold">Google Play Console</a>.</li>
-          <li>Натисніть кнопку <strong>«Створити додаток» (Create app)</strong>.</li>
-          <li>Назва додатку: <code className="font-bold bg-[#24262F] px-2 py-0.5 rounded-lg text-white">ZT Blackout Pre-Warning</code>.</li>
-          <li>Мова за замовчуванням: <strong>Українська (uk-UA)</strong>.</li>
-          <li>Тип: <strong>Додаток (App)</strong>, Безкоштовний (Free).</li>
+          <li>Увійдіть в <a href="https://appstoreconnect.apple.com" target="_blank" rel="noreferrer" className="text-[#FF5E3A] underline font-semibold">App Store Connect</a>.</li>
+          <li>Зареєструйте App ID <code className="font-bold bg-[#24262F] px-2 py-0.5 rounded-lg text-white">ua.blackout.prewarning</code>, розширення віджета <code className="font-bold bg-[#24262F] px-2 py-0.5 rounded-lg text-white">ua.blackout.prewarning.widget</code> та App Group <code className="font-bold bg-[#24262F] px-2 py-0.5 rounded-lg text-white">group.ua.blackout.prewarning</code>.</li>
+          <li>Назва застосунку: <code className="font-bold bg-[#24262F] px-2 py-0.5 rounded-lg text-white">Світло в Житомирі</code>.</li>
+          <li>Основна мова: <strong>Українська (uk)</strong>, додаткова: <strong>English (en-US)</strong>.</li>
+          <li>Категорія: <strong>Utilities (Утиліти)</strong>, Безкоштовний (Free).</li>
         </ol>
       </div>
 
@@ -165,20 +165,20 @@ export const PlayStoreGuide: React.FC = () => {
             3
           </span>
           <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-            Автоматична збірка AAB через GitHub Actions
+            Автоматична збірка .IPA через GitHub Actions (macOS 14)
           </h3>
         </div>
         <p className="text-xs text-zinc-300">
-          При кожному коміті в репозиторій <code className="font-mono text-[#FF5E3A]">https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning</code> запускається робочий процес <code className="font-mono">.github/workflows/build-apk.yml</code>:
+          При кожному коміті в репозиторій <code className="font-mono text-[#FF5E3A]">https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification</code> запускається робочий процес <code className="font-mono">.github/workflows/build-ipa.yml</code>:
         </p>
         <ul className="text-xs text-zinc-300 space-y-2">
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-[#FF5E3A]" />
-            <span>Компілює проект на базі JDK 17 та Android SDK 35</span>
+            <span>Генерує проект Xcode за допомогою XcodeGen та компілює на базі Xcode 15.4 (iOS 17.0 SDK)</span>
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-[#FF5E3A]" />
-            <span>Формує бандл <code className="font-mono text-white">app-release.aab</code></span>
+            <span>Формує архів <code className="font-mono text-white">iOS-ZTPreBlackoutNotification-unsigned.ipa</code> (та підписаний <code className="font-mono text-white">iOS-ZTPreBlackoutNotification-signed.ipa</code> за наявності секретів)</span>
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-[#FF5E3A]" />
@@ -187,19 +187,19 @@ export const PlayStoreGuide: React.FC = () => {
         </ul>
       </div>
 
-      {/* Step 4: Data Safety & Permissions */}
+      {/* Step 4: App Privacy & PrivacyInfo.xcprivacy */}
       <div className="bg-[#1C1D24] rounded-3xl p-5 border border-white/5 shadow-xl flex flex-col gap-3">
         <div className="flex items-center gap-2.5">
           <span className="w-6 h-6 rounded-full bg-white text-black text-xs font-bold flex items-center justify-center">
             4
           </span>
           <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-            Безпека даних (Data Safety)
+            Конфіденційність App Store (PrivacyInfo.xcprivacy)
           </h3>
         </div>
         <div className="bg-[#24262F] p-3.5 rounded-2xl border border-white/5 text-xs space-y-1.5">
-          <div className="font-bold text-white">Збір даних: НІ (No data collected).</div>
-          <p className="text-[11px] text-[#8E92A0]">Додаток не збирає жодних персональних даних. Усі налаштування зберігаються локально на пристрої.</p>
+          <div className="font-bold text-white">Збір даних: НІ (Data Not Collected · NSPrivacyTracking = false).</div>
+          <p className="text-[11px] text-[#8E92A0]">Включено обов'язковий маніфест <code className="font-mono text-sky-300">PrivacyInfo.xcprivacy</code> із декларацією <code className="font-mono text-sky-300">NSPrivacyAccessedAPICategoryUserDefaults (CA92.1)</code> для локального збереження налаштувань та App Group кешу віджета.</p>
         </div>
       </div>
     </div>

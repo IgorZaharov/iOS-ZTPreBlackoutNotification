@@ -38,7 +38,7 @@ const filesToExpose = [
   {
     path: 'ios/Shared/AppStrings.swift',
     language: 'swift',
-    description: 'Bilingual Ukrainian/English strings with 100% parity with AppStrings.kt and i18n.ts'
+    description: 'Bilingual Ukrainian/English strings with 100% parity with i18n.ts'
   },
   {
     path: 'ios/Shared/ZtoeParser.swift',

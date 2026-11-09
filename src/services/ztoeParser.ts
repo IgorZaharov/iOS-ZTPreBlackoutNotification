@@ -1,7 +1,7 @@
 /**
  * ZTOE (Zhytomyroblenergo) Schedule Parser & Schedule Engine
  * Supports live scraping of https://www.ztoe.com.ua/unhooking-search.php
- * with 48 half-hour slot resolution matching Android ZtoeParser.kt 100%.
+ * with 48 half-hour slot resolution matching iOS ZtoeParser.swift 100%.
  */
 import { BlackoutSlot, DaySchedule, QueueOption, SlotStatus } from '../types';
 import validUrlsList from '../../valid-urls.json';

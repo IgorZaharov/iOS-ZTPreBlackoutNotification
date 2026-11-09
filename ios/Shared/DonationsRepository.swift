@@ -2,11 +2,11 @@ import Foundation
 
 public final class DonationsRepository {
     public static let shared = DonationsRepository()
-    public static let REMOTE_DONATIONS_URL = "https://raw.githubusercontent.com/IgorZaharov/Android-ZTBlackoutPreWarning/main/donations.json"
+    public static let REMOTE_DONATIONS_URL = "https://raw.githubusercontent.com/IgorZaharov/iOS-ZTPreBlackoutNotification/main/ios/Resources/donations.json"
     public static let REFRESH_INTERVAL_MS: Int64 = 86_400_000
 
     public static let DEFAULT_DONATIONS: [DonationItem] = [
-        DonationItem(title: "Допомога тваринам", url: "https://send.monobank.ua/jar/7dd225257X"),
+        DonationItem(title: "Допомога тваринам", url: "https://send.monobank.ua/jar/7vJA5xrLoV"),
         DonationItem(title: "Фонд Повернись Живим", url: "https://savelife.in.ua/donate/")
     ]
 
@@ -72,12 +72,11 @@ public final class DonationsRepository {
         }
 
         var candidates = [
-            "https://www.google.com/s2/favicons?domain=\(host)&sz=64",
             "https://icons.duckduckgo.com/ip3/\(host).ico",
             "https://\(host)/favicon.ico"
         ]
         if rootDomain != host {
-            candidates.append("https://www.google.com/s2/favicons?domain=\(rootDomain)&sz=64")
+            candidates.append("https://icons.duckduckgo.com/ip3/\(rootDomain).ico")
             candidates.append("https://\(rootDomain)/favicon.ico")
         }
         return candidates

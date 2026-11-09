@@ -7,15 +7,13 @@ import {
   FileText, 
   ExternalLink
 } from 'lucide-react';
-import { ANDROID_PROJECT_FILES } from '../data/androidProjectFiles';
 import { IOS_PROJECT_FILES } from '../data/iosProjectFiles';
 
 export const CodeExplorer: React.FC = () => {
-  const [platform, setPlatform] = useState<'ios' | 'android'>('ios');
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [copied, setCopied] = useState(false);
 
-  const activeFiles = platform === 'ios' ? IOS_PROJECT_FILES : ANDROID_PROJECT_FILES;
+  const activeFiles = IOS_PROJECT_FILES;
   const currentFile = activeFiles[selectedFileIndex] || activeFiles[0];
 
   const handleCopy = () => {
@@ -31,49 +29,16 @@ export const CodeExplorer: React.FC = () => {
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <FileCode className="w-5 h-5 text-[#FF5E3A]" />
-            <span>{platform === 'ios' ? 'Native iOS Swift & WidgetKit Repository' : 'Native Android Code Repository'}</span>
+            <span>Native iOS Swift & WidgetKit Repository</span>
           </h2>
           <p className="text-xs text-[#8E92A0] mt-0.5">
-            {platform === 'ios' ? (
-              <>Готові вихідні коди Swift 5.10 / SwiftUI / WidgetKit для <code className="font-mono text-[#FF5E3A]">https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification</code></>
-            ) : (
-              <>Готові вихідні коди Kotlin Jetpack Compose для <code className="font-mono text-[#FF5E3A]">https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning</code></>
-            )}
+            Готові вихідні коди Swift 5.10 / SwiftUI / WidgetKit для <code className="font-mono text-[#FF5E3A]">https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification</code>
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start md:self-auto">
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121316] border border-white/10">
-            <button
-              onClick={() => {
-                setPlatform('ios');
-                setSelectedFileIndex(0);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                platform === 'ios' ? 'bg-[#FF5E3A] text-white' : 'text-[#8E92A0] hover:text-white'
-              }`}
-            >
-              iOS (Swift)
-            </button>
-            <button
-              onClick={() => {
-                setPlatform('android');
-                setSelectedFileIndex(0);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                platform === 'android' ? 'bg-[#FF5E3A] text-white' : 'text-[#8E92A0] hover:text-white'
-              }`}
-            >
-              Android (Kotlin)
-            </button>
-          </div>
-
           <a
-            href={
-              platform === 'ios'
-                ? 'https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification'
-                : 'https://github.com/IgorZaharov/Android-ZTBlackoutPreWarning'
-            }
+            href="https://github.com/IgorZaharov/iOS-ZTPreBlackoutNotification"
             target="_blank"
             rel="noreferrer"
             className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white text-black text-xs font-bold hover:bg-zinc-200 transition-all shadow-md"

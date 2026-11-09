@@ -54,7 +54,7 @@ export const translations = {
     navAbout: 'Про додаток',
     navWidget: 'Віджет',
     navCode: 'Код',
-    navPlayStore: 'Play Store',
+    navPlayStore: 'App Store',
 
     // Settings
     settingsTitle: 'Налаштування',
@@ -158,7 +158,7 @@ export const translations = {
     navAbout: 'About',
     navWidget: 'Widget',
     navCode: 'Code',
-    navPlayStore: 'Play Store',
+    navPlayStore: 'App Store',
 
     // Settings
     settingsTitle: 'Settings',
