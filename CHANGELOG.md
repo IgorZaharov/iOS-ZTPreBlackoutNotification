@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.5] - 2026-11-11
+
+### Added
+- **Liquid Glass Apple iOS Style on Grey Sections (`MainView.tsx`, `SettingsView.tsx`, `AboutView.tsx`, `MainScreen.swift`, `SettingsScreen.swift`, `AboutScreen.swift`)**:
+  - Translucent frosted glass background (`bg-[#141A29]/75 backdrop-blur-2xl`) with specular highlight reflection sheens (`shadow-[0_16px_44px_rgba(0,0,0,0.55)]`, `shadow-[0_16px_40px_rgba(0,0,0,0.55)]`, `shadow-[0_12px_40px_rgba(0,0,0,0.45)]`), smooth squircle curvature, and floating drop shadows across Main, Settings, and About windows.
+- **Dynamic Emergency Outage Logic Enhancements & Aliases (`ztoeAddressLookup.ts`, `ztoeParser.ts`, `ScheduleRepository.swift`, `ZtoeParser.swift`, `MainView.tsx`, `SettingsView.tsx`)**:
+  - Added house `22` on `вул. Велика Бердичівська` with `ZTOE_FULL_NO_OUTAGE_MESSAGE`.
+  - Added canonical street ID alias `zt_velyka_berdychivska` -> `zt_berdy` in `findStreetById` and `getHousesForStreet`.
+  - Preserved fallback `ZTOE_REM_OPTIONS` in `parseZtoeRemOptionsHtml`.
+  - Added `endNextDayStr` boundary check in `getEmergencyOverlapMinutesForDay` so emergency outages ending today/tomorrow do not spill past their estimated restoration date into Tomorrow.
+  - Added automatic countdown and timeline refresh on User screen entry (`entryTick`).
+  - Added navigation callback to Main screen upon confirming address in `"?"` dialog (`onNavigateToMain`).
+
 ## [1.3.4] - 2026-11-10
 
 ### Added

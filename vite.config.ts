@@ -23,7 +23,7 @@ function readBuildVersion(): string {
   } catch {
     // Fallback
   }
-  return '1.3.4';
+  return '1.3.5';
 }
 
 export default defineConfig(() => {

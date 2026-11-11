@@ -6,7 +6,7 @@ public struct AboutScreen: View {
     public let onOpenRoulette: () -> Void
     @State private var isPrivacyPolicyPresented: Bool = false
 
-    public static let APP_VERSION = "1.3.4"
+    public static let APP_VERSION = "1.3.5"
 
     public init(
         lang: String,

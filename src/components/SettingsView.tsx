@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   RotateCcw, 
   Send, 
@@ -17,11 +17,6 @@ import {
 import { UserSettings, Language } from '../types';
 import { QUEUES, DEFAULT_ZTOE_URL, verifyZtoeSiteAndData } from '../services/ztoeParser';
 import {
-  ZTOE_REM_OPTIONS,
-  ZtoeRemOption,
-  ZtoeSettlementOption,
-  ZtoeStreetOption,
-  ZtoeHouseLookupResult,
   getRems,
   getSettlementsForRem,
   getStreetsForSettlement,
@@ -45,6 +40,7 @@ interface SettingsViewProps {
   onResetDefaults: () => void;
   autoOpenQueueHelp?: boolean;
   onQueueHelpOpened?: () => void;
+  onNavigateToMain?: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -55,7 +51,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onForceRefresh,
   onResetDefaults,
   autoOpenQueueHelp = false,
-  onQueueHelpOpened
+  onQueueHelpOpened,
+  onNavigateToMain
 }) => {
   const t = translations[lang];
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -73,16 +70,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [selectedHouseNumber, setSelectedHouseNumber] = useState<string>(
     settings.selectedAddressQuery?.house || ''
   );
-  const [rems, setRems] = useState<ZtoeRemOption[]>(() => getRems());
-  const [settlements, setSettlements] = useState<ZtoeSettlementOption[]>(() =>
-    getSettlementsForRem(settings.selectedAddressQuery?.remId || 'zhytomyr')
-  );
-  const [streets, setStreets] = useState<ZtoeStreetOption[]>(() =>
-    getStreetsForSettlement(settings.selectedAddressQuery?.settlementId || 'zt_city')
-  );
-  const [houses, setHouses] = useState<ZtoeHouseLookupResult[]>(() =>
-    getHousesForStreet(settings.selectedAddressQuery?.streetId || '')
-  );
+  const [rems, setRems] = useState(() => getRems());
+  const [settlements, setSettlements] = useState(() => getSettlementsForRem(selectedRemId));
+  const [streets, setStreets] = useState(() => getStreetsForSettlement(selectedSettlementId));
+  const [houses, setHouses] = useState(() => getHousesForStreet(selectedStreetId));
   const [verification, setVerification] = useState<{
     isChecking: boolean;
     isAvailable: boolean;
@@ -97,7 +88,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     message: ''
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (autoOpenQueueHelp) {
       setShowQueueHelp(true);
       onQueueHelpOpened?.();
@@ -105,28 +96,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   }, [autoOpenQueueHelp, onQueueHelpOpened]);
 
   // Keep selected address fields in the "?" popup filled in with the user's saved address when re-entering Settings or reopening the "?" popup
-  useEffect(() => {
+  React.useEffect(() => {
     if (settings.selectedAddressQuery) {
-      const remId = settings.selectedAddressQuery.remId || 'zhytomyr';
-      const settlementId = settings.selectedAddressQuery.settlementId || 'zt_city';
-      const streetId = settings.selectedAddressQuery.streetId || '';
-      setSelectedRemId(remId);
-      setSelectedSettlementId(settlementId);
-      setSelectedStreetId(streetId);
+      setSelectedRemId(settings.selectedAddressQuery.remId || 'zhytomyr');
+      setSelectedSettlementId(settings.selectedAddressQuery.settlementId || 'zt_city');
+      setSelectedStreetId(settings.selectedAddressQuery.streetId || '');
       setSelectedHouseNumber(settings.selectedAddressQuery.house || '');
-      setRems(getRems());
-      setSettlements(getSettlementsForRem(remId));
-      setStreets(getStreetsForSettlement(settlementId));
-      setHouses(getHousesForStreet(streetId));
     } else if (!settings.selectedAddress && !settings.queue) {
       setSelectedRemId('zhytomyr');
       setSelectedSettlementId('zt_city');
       setSelectedStreetId('');
       setSelectedHouseNumber('');
-      setRems(getRems());
-      setSettlements(getSettlementsForRem('zhytomyr'));
-      setStreets(getStreetsForSettlement('zt_city'));
-      setHouses([]);
     }
   }, [
     settings.selectedAddressQuery?.remId,
@@ -138,120 +118,117 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     showQueueHelp
   ]);
 
-  // Separate effect 1: Fetch REMs, settlements, and initial settlement bulk table when modal opens or REM changes
-  useEffect(() => {
-    let mounted = true;
+  // Refresh the list of all REMs, Cities, and Streets (plus bulk-indexed houses for all streets in the settlement)
+  // whenever User enters the "?" screen or changes REM/Settlement, without re-running when User selects a Street
+  React.useEffect(() => {
     setRems(getRems());
     setSettlements(getSettlementsForRem(selectedRemId));
-
-    fetchStreetsForSettlement(selectedRemId, selectedSettlementId || 'zt_city', settings.url, false).then((freshStreets) => {
-      if (!mounted) return;
-      setRems(getRems());
-      setSettlements(getSettlementsForRem(selectedRemId));
-      setStreets(freshStreets);
-      if (selectedStreetId) {
-        setHouses(getHousesForStreet(selectedStreetId));
-      }
-    });
-
-    fetchRemsFromZtoe(settings.url).then((freshRems) => {
-      if (mounted) setRems(freshRems);
-    });
-
-    fetchSettlementsForRem(selectedRemId, settings.url).then((freshSettlements) => {
-      if (!mounted) return;
-      setSettlements(freshSettlements);
-      if (freshSettlements.length > 0 && !freshSettlements.some((s) => s.id === selectedSettlementId)) {
-        const nextSettlementId =
-          selectedRemId === 'zhytomyr' && freshSettlements.some((s) => s.id === 'zt_city')
-            ? 'zt_city'
-            : freshSettlements[0].id;
-        setSelectedSettlementId(nextSettlementId);
-      }
-    });
-
-    return () => {
-      mounted = false;
-    };
-  }, [showQueueHelp, selectedRemId, settings.url]);
-
-  // Separate effect 2: Fetch streets (and all houses in settlement via all=1) when settlement changes
-  useEffect(() => {
-    if (!selectedSettlementId) {
-      setStreets([]);
-      return;
-    }
-    let mounted = true;
     setStreets(getStreetsForSettlement(selectedSettlementId));
-    fetchStreetsForSettlement(selectedRemId, selectedSettlementId, settings.url, false).then((freshStreets) => {
-      if (!mounted) return;
-      setStreets(freshStreets);
-      if (selectedStreetId) {
-        setHouses(getHousesForStreet(selectedStreetId));
+    if (!showQueueHelp) return;
+
+    let cancelled = false;
+    (async () => {
+      if (selectedSettlementId) {
+        const freshStreets = await fetchStreetsForSettlement(
+          selectedRemId,
+          selectedSettlementId,
+          settings.url,
+          true
+        );
+        if (!cancelled && freshStreets.length > 0) {
+          setStreets(freshStreets);
+          setRems(getRems());
+          setSettlements(getSettlementsForRem(selectedRemId));
+          if (selectedStreetId) {
+            const indexedHouses = getHousesForStreet(selectedStreetId);
+            if (indexedHouses.length > 0) {
+              setHouses(indexedHouses);
+            }
+          }
+        }
       }
-    });
+      const [freshRems, freshSettlements] = await Promise.all([
+        fetchRemsFromZtoe(settings.url, true),
+        fetchSettlementsForRem(selectedRemId, settings.url, true),
+      ]);
+      if (!cancelled && freshRems.length > 0) {
+        setRems(freshRems);
+      }
+      if (!cancelled && freshSettlements.length > 0) {
+        setSettlements(freshSettlements);
+      }
+    })();
+
     return () => {
-      mounted = false;
+      cancelled = true;
     };
   }, [showQueueHelp, selectedRemId, selectedSettlementId, settings.url]);
 
-  // Separate effect 3: Fetch houses when street changes
-  useEffect(() => {
-    if (!selectedStreetId) {
-      setHouses([]);
-      return;
-    }
-    let mounted = true;
+  // Immediately populate all houses for the selected street in 0ms from the settlement-wide bulk index
+  React.useEffect(() => {
     setHouses(getHousesForStreet(selectedStreetId));
-    fetchHousesForStreet(selectedRemId, selectedSettlementId, selectedStreetId, settings.url).then((freshHouses) => {
-      if (mounted) setHouses(freshHouses);
-    });
+    if (!showQueueHelp || !selectedStreetId) return;
+
+    let cancelled = false;
+    (async () => {
+      const freshHouses = await fetchHousesForStreet(
+        selectedRemId,
+        selectedSettlementId,
+        selectedStreetId,
+        settings.url,
+        true
+      );
+      if (!cancelled && freshHouses.length > 0) {
+        setHouses(freshHouses);
+      }
+    })();
+
     return () => {
-      mounted = false;
+      cancelled = true;
     };
   }, [showQueueHelp, selectedRemId, selectedSettlementId, selectedStreetId, settings.url]);
 
-  // Separate effect 4: Verify selected address for active emergency outages on ZTOE / PowerOn API
-  useEffect(() => {
-    if (!selectedStreetId || !selectedHouseNumber) return;
-    let mounted = true;
-    checkAddressOnZtoeWebsite(
-      {
-        remId: selectedRemId,
-        settlementId: selectedSettlementId,
-        streetId: selectedStreetId,
-        house: selectedHouseNumber
-      },
-      settings.url
-    ).then((record) => {
-      if (!mounted || !record) return;
-      setHouses((prev) =>
-        prev.some((h) => h.house === selectedHouseNumber || h.house === record.house)
-          ? prev.map((h) =>
-              h.house === selectedHouseNumber || h.house === record.house
-                ? { ...h, ...record, house: h.house }
-                : h
-            )
-          : [...prev, { ...record, house: selectedHouseNumber }]
+  // 4. When User selects a House, check ZTOE (including live pw_accidents emergency outages) and enrich the house record
+  React.useEffect(() => {
+    if (!showQueueHelp || !selectedStreetId || !selectedHouseNumber) return;
+
+    let cancelled = false;
+    (async () => {
+      const checked = await checkAddressOnZtoeWebsite(
+        {
+          remId: selectedRemId,
+          settlementId: selectedSettlementId,
+          streetId: selectedStreetId,
+          house: selectedHouseNumber,
+        },
+        settings.url
       );
-    });
+      if (!cancelled && checked) {
+        setHouses((prev) => {
+          const exists = prev.some((h) => h.house === checked.house);
+          if (!exists) return [...prev, checked];
+          return prev.map((h) => (h.house === checked.house ? { ...h, ...checked } : h));
+        });
+      }
+    })();
+
     return () => {
-      mounted = false;
+      cancelled = true;
     };
   }, [showQueueHelp, selectedRemId, selectedSettlementId, selectedStreetId, selectedHouseNumber, settings.url]);
 
   const matchedHouseRecord = houses.find((h) => h.house === selectedHouseNumber) || null;
-  const selectedRemObj = rems.find((r) => r.id === selectedRemId) || ZTOE_REM_OPTIONS.find((r) => r.id === selectedRemId);
+  const selectedRemObj = rems.find((r) => r.id === selectedRemId);
   const selectedSettlementObj = settlements.find((s) => s.id === selectedSettlementId);
   const selectedStreetObj = streets.find((st) => st.id === selectedStreetId);
   const selectedAddressStr = selectedHouseNumber
     ? lang === 'uk'
-      ? `${decodeHtmlEntities(selectedRemObj?.nameUk || '')}, ${decodeHtmlEntities(selectedSettlementObj?.nameUk || '')},\n${decodeHtmlEntities(selectedStreetObj?.nameUk || '')}, буд. ${decodeHtmlEntities(selectedHouseNumber)}`
-      : `${decodeHtmlEntities(selectedRemObj?.nameEn || '')}, ${decodeHtmlEntities(selectedSettlementObj?.nameEn || '')},\n${decodeHtmlEntities(selectedStreetObj?.nameEn || '')}, bldg. ${decodeHtmlEntities(selectedHouseNumber)}`
+      ? `${decodeHtmlEntities(selectedRemObj?.nameUk || '')}, ${decodeHtmlEntities(selectedSettlementObj?.nameUk || '')},\n${decodeHtmlEntities(selectedStreetObj?.nameUk || '')}, буд. ${selectedHouseNumber}`
+      : `${decodeHtmlEntities(selectedRemObj?.nameEn || '')}, ${decodeHtmlEntities(selectedSettlementObj?.nameEn || '')},\n${decodeHtmlEntities(selectedStreetObj?.nameEn || '')}, bldg. ${selectedHouseNumber}`
     : undefined;
 
   // Verify site accessibility and data presence against /valid-urls.json on URL or queue change
-  useEffect(() => {
+  React.useEffect(() => {
     let isMounted = true;
     setVerification(prev => ({ ...prev, isChecking: true }));
 
@@ -315,7 +292,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* 1. Queue Selection (Only Drop-down List + ? Help Glyph) */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -367,7 +344,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* 2. Site Address with Reachability and Data Verification Glyph */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-2">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
             <Globe className="w-3.5 h-3.5 text-[#FF5E3A]" />
@@ -441,7 +418,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* 3. Timers: Clean Edit Boxes restricted strictly to 1..240 */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-4">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-4">
         
         {/* Advance Alert Notice - Default 15 min (CRITICAL CONSTANT) */}
         <div>
@@ -504,7 +481,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* 4. Notification Toggles (Turning OFF notifications turns off & disables sound and vibration; turning ON restores previous states) */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4 text-white" />
@@ -532,7 +509,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </button>
         </div>
 
-        <div className={`flex items-center justify-between pt-2.5 border-t border-white/10 ${!settings.notificationsEnabled ? 'opacity-45' : ''}`}>
+        <div className={`flex items-center justify-between pt-2.5 border-t border-white/10 ${!(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) ? 'opacity-45' : ''}`}>
           <div className="flex items-center gap-2 text-xs text-sky-100">
             <Volume2 className="w-4 h-4 text-sky-200/70" />
             <span>{t.settingsSound}</span>
@@ -540,11 +517,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <button
             type="button"
             role="switch"
-            aria-checked={Boolean(settings.notificationsEnabled && settings.soundEnabled)}
+            aria-checked={Boolean((settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) && settings.soundEnabled)}
             data-testid="ios-switch-sound"
-            disabled={!settings.notificationsEnabled}
+            disabled={!(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true))}
             onClick={() => {
-              if (!settings.notificationsEnabled) return;
+              if (!(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true))) return;
               const nextVal = !settings.soundEnabled;
               onUpdateSettings({
                 ...settings,
@@ -553,22 +530,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               });
             }}
             className={`w-[51px] h-[31px] rounded-full p-[2px] transition-colors duration-200 flex items-center shrink-0 ${
-              !settings.notificationsEnabled ? 'cursor-not-allowed' : 'cursor-pointer'
+              !(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) ? 'cursor-not-allowed' : 'cursor-pointer'
             } ${
-              settings.notificationsEnabled && settings.soundEnabled
+              (settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) && settings.soundEnabled
                 ? 'bg-[#FF5E3A] shadow-inner'
                 : 'bg-white/15 border border-white/10'
             }`}
           >
             <div
               className={`w-[27px] h-[27px] rounded-full bg-white shadow-[0_3px_8px_rgba(0,0,0,0.25),0_1px_1px_rgba(0,0,0,0.16)] transition-transform duration-200 ${
-                settings.notificationsEnabled && settings.soundEnabled ? 'translate-x-[20px]' : 'translate-x-0'
+                (settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) && settings.soundEnabled ? 'translate-x-[20px]' : 'translate-x-0'
               }`}
             />
           </button>
         </div>
 
-        <div className={`flex items-center justify-between pt-2.5 border-t border-white/10 ${!settings.notificationsEnabled ? 'opacity-45' : ''}`}>
+        <div className={`flex items-center justify-between pt-2.5 border-t border-white/10 ${!(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) ? 'opacity-45' : ''}`}>
           <div className="flex items-center gap-2 text-xs text-sky-100">
             <Vibrate className="w-4 h-4 text-sky-200/70" />
             <span>{t.settingsVibration}</span>
@@ -576,11 +553,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <button
             type="button"
             role="switch"
-            aria-checked={Boolean(settings.notificationsEnabled && settings.vibrationEnabled)}
+            aria-checked={Boolean((settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) && settings.vibrationEnabled)}
             data-testid="ios-switch-vibration"
-            disabled={!settings.notificationsEnabled}
+            disabled={!(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true))}
             onClick={() => {
-              if (!settings.notificationsEnabled) return;
+              if (!(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true))) return;
               const nextVal = !settings.vibrationEnabled;
               onUpdateSettings({
                 ...settings,
@@ -589,34 +566,34 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               });
             }}
             className={`w-[51px] h-[31px] rounded-full p-[2px] transition-colors duration-200 flex items-center shrink-0 ${
-              !settings.notificationsEnabled ? 'cursor-not-allowed' : 'cursor-pointer'
+              !(settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) ? 'cursor-not-allowed' : 'cursor-pointer'
             } ${
-              settings.notificationsEnabled && settings.vibrationEnabled
+              (settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) && settings.vibrationEnabled
                 ? 'bg-[#FF5E3A] shadow-inner'
                 : 'bg-white/15 border border-white/10'
             }`}
           >
             <div
               className={`w-[27px] h-[27px] rounded-full bg-white shadow-[0_3px_8px_rgba(0,0,0,0.25),0_1px_1px_rgba(0,0,0,0.16)] transition-transform duration-200 ${
-                settings.notificationsEnabled && settings.vibrationEnabled ? 'translate-x-[20px]' : 'translate-x-0'
+                (settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)) && settings.vibrationEnabled ? 'translate-x-[20px]' : 'translate-x-0'
               }`}
             />
           </button>
         </div>
       </div>
 
-      {/* 4b. Independent Emergency Outage Notifications Card */}
+      {/* 4b. Emergency Power Outages Switch (Separate block below Notifications block; always visible even when no outages detected; ON by default) */}
       <div
         data-testid="emergency-outage-switch-card"
-        className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-3"
+        className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-3"
       >
         <div
           data-testid="emergency-outage-switch-row"
           className="flex items-center justify-between gap-3"
         >
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <AlertTriangle className="w-4 h-4 text-[#FF5E3A] shrink-0" />
-            <span className="text-xs font-bold text-white uppercase tracking-wider leading-snug">
+            <span className="text-xs font-bold text-white uppercase tracking-wider break-words leading-snug">
               {t.settingsEmergencyOutages}
             </span>
           </div>
@@ -642,7 +619,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* 5. Language (iOS Segmented Control) */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-3">
         <label className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
           <Globe className="w-3.5 h-3.5 text-[#FF5E3A]" />
           <span>{t.settingsLanguage}</span>
@@ -676,7 +653,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* 6. Diagnostics & Actions (With Confirmation on Reset) */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-2.5">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-2.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button
             onClick={() => {
@@ -771,7 +748,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             {/* 1. Interactive ZTOE Address Queue Lookup (switched to top, expanded internal block border) */}
             <div
               data-testid="ztoe-address-lookup-section"
-              className="w-full flex flex-col gap-3.5 p-5 rounded-3xl bg-white/[0.05] border-2 border-white/25 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]"
+              className="w-full flex flex-col gap-3.5 p-5 rounded-3xl bg-white/[0.05] border-2 border-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
             >
               <div className="flex flex-col gap-1">
                 <div className="text-sm font-extrabold text-white uppercase tracking-wider">
@@ -779,9 +756,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </div>
                 <div
                   data-testid="ztoe-address-lookup-subtitle"
-                  className="text-xs font-medium text-sky-200/75 leading-snug"
+                  className="text-xs font-medium text-sky-200/80"
                 >
-                  {t.queueHelpSubtitle}
+                  {lang === 'uk'
+                    ? '(Або закрийте це вікно та виберіть тільки чергу)'
+                    : '(Or close this window and select directly)'}
                 </div>
               </div>
 
@@ -798,22 +777,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       setSelectedRemId(nextRem);
                       const nextSettlements = getSettlementsForRem(nextRem);
                       setSettlements(nextSettlements);
-                      const firstSettlement =
-                        nextRem === 'zhytomyr' && nextSettlements.some((s) => s.id === 'zt_city')
-                          ? 'zt_city'
-                          : nextSettlements[0]?.id || '';
+                      const firstSettlement = nextSettlements[0]?.id || '';
                       setSelectedSettlementId(firstSettlement);
-                      const nextStreets = firstSettlement ? getStreetsForSettlement(firstSettlement) : [];
+                      const nextStreets = getStreetsForSettlement(firstSettlement);
                       setStreets(nextStreets);
-                      setSelectedStreetId('');
-                      setHouses([]);
+                      const firstStreet = nextStreets[0]?.id || '';
+                      setSelectedStreetId(firstStreet);
+                      setHouses(getHousesForStreet(firstStreet));
                       setSelectedHouseNumber('');
                     }}
                     className="w-full text-base font-bold bg-white/[0.08] border-2 border-white/20 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-[#FF5E3A] cursor-pointer"
                   >
                     {rems.map((rem) => (
                       <option key={rem.id} value={rem.id} className="bg-[#141A29] text-white">
-                        {decodeHtmlEntities(lang === 'uk' ? rem.nameUk : rem.nameEn)}
+                        {lang === 'uk' ? rem.nameUk : rem.nameEn}
                       </option>
                     ))}
                   </select>
@@ -833,15 +810,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       setStreets(nextStreets);
                       const firstStreet = nextStreets[0]?.id || '';
                       setSelectedStreetId(firstStreet);
-                      const nextHouses = firstStreet ? getHousesForStreet(firstStreet) : [];
-                      setHouses(nextHouses);
+                      setHouses(getHousesForStreet(firstStreet));
                       setSelectedHouseNumber('');
                     }}
                     className="w-full text-base font-bold bg-white/[0.08] border-2 border-white/20 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-[#FF5E3A] cursor-pointer"
                   >
                     {settlements.map((s) => (
                       <option key={s.id} value={s.id} className="bg-[#141A29] text-white">
-                        {decodeHtmlEntities(lang === 'uk' ? s.nameUk : s.nameEn)}
+                        {lang === 'uk' ? s.nameUk : s.nameEn}
                       </option>
                     ))}
                   </select>
@@ -857,7 +833,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     onChange={(e) => {
                       const nextStreet = e.target.value;
                       setSelectedStreetId(nextStreet);
-                      setHouses(nextStreet ? getHousesForStreet(nextStreet) : []);
+                      setHouses(getHousesForStreet(nextStreet));
                       setSelectedHouseNumber('');
                     }}
                     className="w-full text-base font-bold bg-white/[0.08] border-2 border-white/20 rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-[#FF5E3A] cursor-pointer"
@@ -867,7 +843,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </option>
                     {streets.map((st) => (
                       <option key={st.id} value={st.id} className="bg-[#141A29] text-white">
-                        {decodeHtmlEntities(lang === 'uk' ? st.nameUk : st.nameEn)}
+                        {lang === 'uk' ? st.nameUk : st.nameEn}
                       </option>
                     ))}
                   </select>
@@ -888,7 +864,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </option>
                     {houses.map((h) => (
                       <option key={h.house} value={h.house} className="bg-[#141A29] text-white">
-                        {decodeHtmlEntities(h.house)}
+                        {h.house}
                       </option>
                     ))}
                   </select>
@@ -898,7 +874,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               {matchedHouseRecord && (
                 <div
                   data-testid="ztoe-lookup-result"
-                  className="mt-1.5 p-4 rounded-2xl bg-[#141A29]/85 backdrop-blur-2xl border-2 border-white/25 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-2.5"
+                  className="mt-1.5 p-4 rounded-2xl bg-[#141A29]/85 backdrop-blur-2xl border-2 border-white/25 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col gap-2.5"
                 >
                   {selectedAddressStr && (
                     <div
@@ -906,24 +882,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       className="text-sm text-sky-200/90 font-semibold leading-snug whitespace-pre-line"
                     >
                       {selectedAddressStr}
-                    </div>
-                  )}
-                  {matchedHouseRecord.emergencyOutage && (
-                    <div
-                      data-testid="ztoe-lookup-emergency-outage"
-                      className="text-sm font-bold text-[#FF5E3A] bg-[#FF5E3A]/10 border-2 border-[#FF5E3A]/35 rounded-2xl px-4 py-3 leading-snug"
-                    >
-                      <div>
-                        {lang === 'uk'
-                          ? matchedHouseRecord.emergencyOutage.outageType || 'Аварійне відключення'
-                          : 'Emergency Outage'}
-                      </div>
-                      <div className="text-xs text-white font-mono mt-1">
-                        {lang === 'uk' ? 'Початок: ' : 'Start: '}
-                        {matchedHouseRecord.emergencyOutage.startTime} ·{' '}
-                        {lang === 'uk' ? 'Відновлення: ' : 'Restore: '}
-                        {matchedHouseRecord.emergencyOutage.estimatedRestoreTime}
-                      </div>
                     </div>
                   )}
                   {matchedHouseRecord.queue && (
@@ -944,6 +902,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       {matchedHouseRecord.statusText}
                     </div>
                   )}
+                  {matchedHouseRecord.emergencyOutage && (
+                    <div
+                      data-testid="ztoe-lookup-emergency-outage"
+                      className="text-sm font-bold text-[#FF5E3A] bg-[#FF5E3A]/10 border-2 border-[#FF5E3A]/35 rounded-2xl px-4 py-3 leading-snug"
+                    >
+                      <div>
+                        {lang === 'uk'
+                          ? matchedHouseRecord.emergencyOutage.outageType || 'Аварійне відключення'
+                          : 'Emergency Outage'}
+                      </div>
+                      <div className="text-xs text-white font-mono mt-1">
+                        {lang === 'uk' ? 'Початок: ' : 'Start: '}
+                        {matchedHouseRecord.emergencyOutage.startTime} ·{' '}
+                        {lang === 'uk' ? 'Відновлення: ' : 'Restore: '}
+                        {matchedHouseRecord.emergencyOutage.estimatedRestoreTime}
+                      </div>
+                    </div>
+                  )}
                   <button
                     type="button"
                     data-testid="ztoe-lookup-confirm-btn"
@@ -962,6 +938,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                         activeEmergencyOutage: matchedHouseRecord.emergencyOutage ?? null
                       });
                       setShowQueueHelp(false);
+                      onNavigateToMain?.();
                       showToast(
                         matchedHouseRecord.queue
                           ? `${t.queue} ${matchedHouseRecord.queue}`
@@ -993,7 +970,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             {/* 3. Numbered Instruction Steps (1..4) */}
             <div className="flex flex-col gap-3 text-sm leading-relaxed text-zinc-100">
               {/* Step 1 */}
-              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
+              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15">
                 <span className="w-6 h-6 rounded-full bg-white/15 text-white font-bold flex items-center justify-center text-xs shrink-0 font-mono mt-0.5">
                   1
                 </span>
@@ -1027,7 +1004,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
 
               {/* Step 2 */}
-              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
+              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15">
                 <span className="w-6 h-6 rounded-full bg-white/15 text-white font-bold flex items-center justify-center text-xs shrink-0 font-mono mt-0.5">
                   2
                 </span>
@@ -1041,7 +1018,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
 
               {/* Step 3 */}
-              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
+              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15">
                 <span className="w-6 h-6 rounded-full bg-white/15 text-white font-bold flex items-center justify-center text-xs shrink-0 font-mono mt-0.5">
                   3
                 </span>
@@ -1059,7 +1036,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
 
               {/* Step 4 */}
-              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
+              <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border-2 border-white/15">
                 <span className="w-6 h-6 rounded-full bg-white/15 text-white font-bold flex items-center justify-center text-xs shrink-0 font-mono mt-0.5">
                   4
                 </span>

@@ -14,6 +14,7 @@ import {
   getBlackoutIntervals,
   getChartHalfHourBlocks
 } from '../services/ztoeParser';
+import { isValidEmergencyOutage } from '../services/ztoeAddressLookup';
 import { translations } from '../services/i18n';
 
 interface MainViewProps {
@@ -45,7 +46,7 @@ export const MainView: React.FC<MainViewProps> = ({
   const t = translations[lang];
   const [selectedDayTab, setSelectedDayTab] = useState<'today' | 'tomorrow'>('today');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const hasActiveEmergencyOutage = Boolean(settings.activeEmergencyOutage);
+  const hasActiveEmergencyOutage = isValidEmergencyOutage(settings.activeEmergencyOutage);
   const hasNoQueueMessage = Boolean(
     settings.customQueueStatusText &&
       (!settings.queue || settings.queue.trim() === '') &&
@@ -72,6 +73,13 @@ export const MainView: React.FC<MainViewProps> = ({
     }
   }, [effectiveTomorrowSchedule, selectedDayTab]);
 
+  const [entryTick, setEntryTick] = useState(0);
+
+  // Automatically refresh timer and drum bar when User enters main screen
+  useEffect(() => {
+    setEntryTick((prev) => prev + 1);
+  }, []);
+
   const isTomorrowActive = selectedDayTab === 'tomorrow' && effectiveTomorrowSchedule !== null;
   const activeSchedule = isTomorrowActive ? effectiveTomorrowSchedule! : effectiveTodaySchedule;
   const activeSlotsSignature = useMemo(
@@ -81,17 +89,17 @@ export const MainView: React.FC<MainViewProps> = ({
 
   const blackoutIntervals = useMemo(
     () => getBlackoutIntervals(activeSchedule.slots),
-    [selectedDayTab, activeSchedule.dateStr, activeSlotsSignature, activeSchedule.slots]
+    [selectedDayTab, activeSchedule.dateStr, activeSlotsSignature, activeSchedule.slots, entryTick]
   );
 
   const chartBlocks = useMemo(
     () => getChartHalfHourBlocks(activeSchedule.slots),
-    [selectedDayTab, activeSchedule.dateStr, activeSlotsSignature, activeSchedule.slots]
+    [selectedDayTab, activeSchedule.dateStr, activeSlotsSignature, activeSchedule.slots, entryTick]
   );
 
   const countdown = useMemo(
     () => calculateOutageCountdown(effectiveTodaySchedule, now, effectiveTomorrowSchedule),
-    [effectiveTodaySchedule, now, effectiveTomorrowSchedule]
+    [effectiveTodaySchedule, now, effectiveTomorrowSchedule, entryTick]
   );
 
   const isUnclear =
@@ -275,11 +283,11 @@ export const MainView: React.FC<MainViewProps> = ({
           isQueueUnselected ? 'opacity-15 brightness-50 pointer-events-none select-none' : ''
         }`}
       >
-      {/* Active Emergency Outage ("Аварійне відключення") Banner with Start & Estimated Restore Times — always shown first with top priority */}
-      {!isQueueUnselected && settings.activeEmergencyOutage && (
+      {/* Active Emergency Outage ("Аварійне відключення") Banner with Start & Estimated Restore Times */}
+      {!isQueueUnselected && hasActiveEmergencyOutage && settings.activeEmergencyOutage && (
         <div
           data-testid="main-emergency-outage-banner"
-          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-1.5"
+          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.55)] flex flex-col gap-1.5"
         >
           <div
             data-testid="main-emergency-outage-title"
@@ -291,7 +299,7 @@ export const MainView: React.FC<MainViewProps> = ({
           </div>
           <div
             data-testid="main-emergency-outage-times"
-            className="flex flex-col gap-1 text-xs text-white font-mono tabular-nums leading-snug"
+            className="flex flex-col gap-0.5 text-xs text-white font-mono tabular-nums leading-snug"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-sky-200/70 font-sans font-medium">
@@ -315,7 +323,7 @@ export const MainView: React.FC<MainViewProps> = ({
       {!isQueueUnselected && settings.customQueueStatusText && (
         <div
           data-testid="main-custom-queue-status-text"
-          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-1"
+          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.55)] flex flex-col gap-1"
         >
           {settings.selectedAddress && (
             <div
@@ -334,7 +342,7 @@ export const MainView: React.FC<MainViewProps> = ({
       {/* Hero Outage Status Card (Frosted Glass with Subtle Blue Glow) */}
       <div
         data-testid="main-counter-card"
-        className="rounded-3xl p-5 bg-[#141A29]/75 backdrop-blur-2xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] transition-all"
+        className="rounded-3xl p-5 bg-[#141A29]/75 backdrop-blur-2xl border border-white/15 shadow-[0_16px_40px_rgba(0,0,0,0.55)] transition-all"
       >
         {hasNoQueueMessage ? (
           <div data-testid="main-counter-empty" className="my-4 text-center">
@@ -416,7 +424,7 @@ export const MainView: React.FC<MainViewProps> = ({
 
       {/* Day Selector (Today / Tomorrow if Tomorrow table exists on site; otherwise centered Today button) */}
       {effectiveTomorrowSchedule ? (
-        <div className="flex gap-2 p-1.5 bg-[#141A29]/70 backdrop-blur-xl rounded-2xl border border-white/10">
+        <div className="flex gap-2 p-1.5 bg-[#141A29]/70 backdrop-blur-xl rounded-2xl border border-white/10 shadow-[0_12px_36px_rgba(0,0,0,0.45)]">
           <button
             onClick={() => setSelectedDayTab('today')}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-bold transition-all ${
@@ -440,14 +448,14 @@ export const MainView: React.FC<MainViewProps> = ({
         </div>
       ) : (
         <div className="flex justify-center">
-          <div className="py-2.5 px-6 bg-[#141A29]/80 backdrop-blur-xl rounded-2xl border border-white/15 text-sm font-bold text-white shadow-md">
+          <div className="py-2.5 px-6 bg-[#141A29]/80 backdrop-blur-xl rounded-2xl border border-white/15 text-sm font-bold text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)]">
             {t.today}
           </div>
         </div>
       )}
 
       {/* Schedule Card with 24h Timeline */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-4">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_16px_44px_rgba(0,0,0,0.55)] flex flex-col gap-4">
         
         {/* Inner 24h Timeline Graph & Needle styled after classic analog electricity meter (САЗУ-ИТ) */}
         <div className="bg-gradient-to-b from-[#DFDDD0] via-[#D4D1C1] to-[#C6C2B0] border-2 border-[#7A7768] shadow-[inset_0_2px_5px_rgba(0,0,0,0.3)] rounded-2xl px-3 pt-4 pb-3 select-none flex flex-col">
@@ -612,7 +620,7 @@ export const MainView: React.FC<MainViewProps> = ({
       </div>
 
       {/* Last Updated, Next Refresh & Circular Refresh Button */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-2xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex items-center justify-between gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-2xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center justify-between gap-3">
         <div className="text-xs text-sky-200/80 space-y-1">
           <div>
             <span className="font-medium text-sky-200/60">{t.lastUpdated}: </span>
@@ -636,7 +644,7 @@ export const MainView: React.FC<MainViewProps> = ({
       </div>
 
       {/* Emergency Outages Info Link right after the Refresh block (with Facebook logo and word wrapping on caption only) */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
         <a
           href="https://www.facebook.com/ztoe.com.ua"
           target="_blank"
@@ -668,7 +676,7 @@ export const MainView: React.FC<MainViewProps> = ({
       </div>
 
       {/* Blackout Schedules on ZTOE Website Link at very bottom after Facebook link */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
         <a
           href="https://www.ztoe.com.ua/unhooking-search.php"
           target="_blank"
