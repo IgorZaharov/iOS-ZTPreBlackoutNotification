@@ -316,14 +316,47 @@ public final class ZtoeParser {
         return String(format: "%02d:%02d - %02d:%02d", sh, sm, eh, em)
     }
 
+    public static func decodeHtmlEntities(_ raw: String) -> String {
+        guard !raw.isEmpty else { return "" }
+        var result = raw.replacingOccurrences(of: "&amp;", with: "&", options: .caseInsensitive)
+        let apostropheEntities = ["&#039;", "&#39;", "&#x27;", "&#x0027;", "&apos;", "&#8217;", "&#146;", "&#0146;", "&rsquo;", "&lsquo;"]
+        for entity in apostropheEntities {
+            result = result.replacingOccurrences(of: entity, with: "'", options: .caseInsensitive)
+        }
+        result = result
+            .replacingOccurrences(of: "&quot;", with: "\"", options: .caseInsensitive)
+            .replacingOccurrences(of: "&#34;", with: "\"", options: .caseInsensitive)
+            .replacingOccurrences(of: "&#034;", with: "\"", options: .caseInsensitive)
+            .replacingOccurrences(of: "&nbsp;", with: " ", options: .caseInsensitive)
+            .replacingOccurrences(of: "&#160;", with: " ", options: .caseInsensitive)
+            .replacingOccurrences(of: "&#0160;", with: " ", options: .caseInsensitive)
+            .replacingOccurrences(of: "&lt;", with: "<", options: .caseInsensitive)
+            .replacingOccurrences(of: "&gt;", with: ">", options: .caseInsensitive)
+        return result
+    }
+
+    public static func isValidOutageTimestamp(_ value: String?) -> Bool {
+        guard let val = value?.trimmingCharacters(in: .whitespacesAndNewlines), !val.isEmpty else {
+            return false
+        }
+        let lower = val.lowercased()
+        if lower.contains("не вимикається") || lower.contains("за винятком") {
+            return false
+        }
+        let pattern = "^(\\d{2}\\.\\d{2}(?:\\.\\d{2,4})?\\s+)?\\d{1,2}:\\d{2}$"
+        guard let rx = try? NSRegularExpression(pattern: pattern) else { return false }
+        let nsVal = val as NSString
+        return rx.firstMatch(in: val, range: NSRange(location: 0, length: nsVal.length)) != nil
+    }
+
     private static func stripTags(_ html: String) -> String {
         guard let regex = stripTagsRegex else {
-            return html.replacingOccurrences(of: "&nbsp;", with: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+            return decodeHtmlEntities(html)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
         }
         let nsHtml = html as NSString
         let stripped = regex.stringByReplacingMatches(in: html, range: NSRange(location: 0, length: nsHtml.length), withTemplate: "")
-        return stripped
-            .replacingOccurrences(of: "&nbsp;", with: " ")
+        return decodeHtmlEntities(stripped)
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

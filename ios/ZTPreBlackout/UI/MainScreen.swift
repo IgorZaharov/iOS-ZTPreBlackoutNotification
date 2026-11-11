@@ -122,6 +122,42 @@ public struct MainScreen: View {
                     .padding(.horizontal, 4)
 
                 VStack(spacing: 14) {
+                    // Active Emergency Outage ("Аварійне відключення") Banner with Symmetrical Start & Estimated Restore Times — always shown first with top priority
+                    if !isQueueUnselected, let start = emergencyOutageStartTime, !start.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(lang == "en" ? "Emergency Outage" : "Аварійне відключення")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
+                            HStack {
+                                Text(lang == "en" ? "Start: " : "Початок: ")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.75))
+                                Spacer()
+                                Text(start)
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .monospacedDigit()
+                                    .foregroundColor(.white)
+                            }
+                            if let restore = emergencyOutageRestoreTime, !restore.isEmpty {
+                                HStack {
+                                    Text(lang == "en" ? "Estimated restore: " : "Орієнтовне відновлення: ")
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(.white.opacity(0.75))
+                                    Spacer()
+                                    Text(restore)
+                                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                        .monospacedDigit()
+                                        .foregroundColor(.white)
+                                }
+                            }
+                        }
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
+                        .cornerRadius(24)
+                        .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
+                    }
+
                     // Custom ZTOE Queue/House Status Message Bar — same style/color as other Main screen bars
                     if !isQueueUnselected, let customText = customQueueStatusText, !customText.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {
@@ -138,27 +174,7 @@ public struct MainScreen: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                         .cornerRadius(24)
-                    }
-
-                    // Active Emergency Outage ("Аварійне відключення") Banner with Start & Estimated Restore Times
-                    if !isQueueUnselected, let start = emergencyOutageStartTime, !start.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(lang == "en" ? "Emergency Outage" : "Аварійне відключення")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
-                            Text("\(lang == "en" ? "Start: " : "Початок: ")\(start)")
-                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                .foregroundColor(.white)
-                            if let restore = emergencyOutageRestoreTime, !restore.isEmpty {
-                                Text("\(lang == "en" ? "Estimated restore: " : "Орієнтовне відновлення: ")\(restore)")
-                                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                    .foregroundColor(.white)
-                            }
-                        }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
-                        .cornerRadius(24)
+                        .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
                     }
 
                     // Hero Status & Countdown Card
@@ -211,6 +227,7 @@ public struct MainScreen: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                     .cornerRadius(24)
+                    .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                     // 24h Schedule Card + Outage Hours List keyed by (queue, selectedDayTab, activeSlotsSignature)
                     VStack(alignment: .leading, spacing: 12) {
@@ -309,6 +326,7 @@ public struct MainScreen: View {
                     .padding(16)
                     .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                     .cornerRadius(24)
+                    .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                     // Emergency Outages Facebook Link & ZTOE Website Schedules Link
                     VStack(alignment: .leading, spacing: 10) {
@@ -345,6 +363,7 @@ public struct MainScreen: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                     .cornerRadius(24)
+                    .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
                 }
                 .opacity(isQueueUnselected ? 0.15 : 1.0)
                 .disabled(isQueueUnselected)

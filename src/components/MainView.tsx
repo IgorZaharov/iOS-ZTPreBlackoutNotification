@@ -275,11 +275,47 @@ export const MainView: React.FC<MainViewProps> = ({
           isQueueUnselected ? 'opacity-15 brightness-50 pointer-events-none select-none' : ''
         }`}
       >
+      {/* Active Emergency Outage ("Аварійне відключення") Banner with Start & Estimated Restore Times — always shown first with top priority */}
+      {!isQueueUnselected && settings.activeEmergencyOutage && (
+        <div
+          data-testid="main-emergency-outage-banner"
+          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-1.5"
+        >
+          <div
+            data-testid="main-emergency-outage-title"
+            className="text-sm font-bold text-[#FF5E3A] leading-snug"
+          >
+            {lang === 'uk'
+              ? settings.activeEmergencyOutage.outageType || 'Аварійне відключення'
+              : 'Emergency Outage'}
+          </div>
+          <div
+            data-testid="main-emergency-outage-times"
+            className="flex flex-col gap-1 text-xs text-white font-mono tabular-nums leading-snug"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sky-200/70 font-sans font-medium">
+                {lang === 'uk' ? 'Початок: ' : 'Start: '}
+              </span>
+              <span className="font-bold text-right">{settings.activeEmergencyOutage.startTime || '--:--'}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sky-200/70 font-sans font-medium">
+                {lang === 'uk' ? 'Орієнтовне відновлення: ' : 'Estimated restore: '}
+              </span>
+              <span className="font-bold text-right">
+                {settings.activeEmergencyOutage.estimatedRestoreTime || '--:--'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Custom ZTOE Queue/House Status Message Bar — exact same style/color as other Main screen bars */}
       {!isQueueUnselected && settings.customQueueStatusText && (
         <div
           data-testid="main-custom-queue-status-text"
-          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col gap-1"
+          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-1"
         >
           {settings.selectedAddress && (
             <div
@@ -295,46 +331,10 @@ export const MainView: React.FC<MainViewProps> = ({
         </div>
       )}
 
-      {/* Active Emergency Outage ("Аварійне відключення") Banner with Start & Estimated Restore Times */}
-      {!isQueueUnselected && settings.activeEmergencyOutage && (
-        <div
-          data-testid="main-emergency-outage-banner"
-          className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col gap-1.5"
-        >
-          <div
-            data-testid="main-emergency-outage-title"
-            className="text-sm font-bold text-[#FF5E3A] leading-snug"
-          >
-            {lang === 'uk'
-              ? settings.activeEmergencyOutage.outageType || 'Аварійне відключення'
-              : 'Emergency Outage'}
-          </div>
-          <div
-            data-testid="main-emergency-outage-times"
-            className="flex flex-col gap-0.5 text-xs text-white font-mono tabular-nums leading-snug"
-          >
-            <div>
-              <span className="text-sky-200/70 font-sans font-medium">
-                {lang === 'uk' ? 'Початок: ' : 'Start: '}
-              </span>
-              <span className="font-bold">{settings.activeEmergencyOutage.startTime || '--:--'}</span>
-            </div>
-            <div>
-              <span className="text-sky-200/70 font-sans font-medium">
-                {lang === 'uk' ? 'Орієнтовне відновлення: ' : 'Estimated restore: '}
-              </span>
-              <span className="font-bold">
-                {settings.activeEmergencyOutage.estimatedRestoreTime || '--:--'}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Hero Outage Status Card (Frosted Glass with Subtle Blue Glow) */}
       <div
         data-testid="main-counter-card"
-        className="rounded-3xl p-5 bg-[#141A29]/75 backdrop-blur-2xl border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] transition-all"
+        className="rounded-3xl p-5 bg-[#141A29]/75 backdrop-blur-2xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] transition-all"
       >
         {hasNoQueueMessage ? (
           <div data-testid="main-counter-empty" className="my-4 text-center">
@@ -447,7 +447,7 @@ export const MainView: React.FC<MainViewProps> = ({
       )}
 
       {/* Schedule Card with 24h Timeline */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col gap-4">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-4">
         
         {/* Inner 24h Timeline Graph & Needle styled after classic analog electricity meter (САЗУ-ИТ) */}
         <div className="bg-gradient-to-b from-[#DFDDD0] via-[#D4D1C1] to-[#C6C2B0] border-2 border-[#7A7768] shadow-[inset_0_2px_5px_rgba(0,0,0,0.3)] rounded-2xl px-3 pt-4 pb-3 select-none flex flex-col">
@@ -612,7 +612,7 @@ export const MainView: React.FC<MainViewProps> = ({
       </div>
 
       {/* Last Updated, Next Refresh & Circular Refresh Button */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-2xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center justify-between gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-2xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex items-center justify-between gap-3">
         <div className="text-xs text-sky-200/80 space-y-1">
           <div>
             <span className="font-medium text-sky-200/60">{t.lastUpdated}: </span>
@@ -636,7 +636,7 @@ export const MainView: React.FC<MainViewProps> = ({
       </div>
 
       {/* Emergency Outages Info Link right after the Refresh block (with Facebook logo and word wrapping on caption only) */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
         <a
           href="https://www.facebook.com/ztoe.com.ua"
           target="_blank"
@@ -668,7 +668,7 @@ export const MainView: React.FC<MainViewProps> = ({
       </div>
 
       {/* Blackout Schedules on ZTOE Website Link at very bottom after Facebook link */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)]">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]">
         <a
           href="https://www.ztoe.com.ua/unhooking-search.php"
           target="_blank"

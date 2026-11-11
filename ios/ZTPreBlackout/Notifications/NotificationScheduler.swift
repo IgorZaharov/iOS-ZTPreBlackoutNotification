@@ -138,6 +138,37 @@ public final class NotificationScheduler {
         UNUserNotificationCenter.current().add(req, withCompletionHandler: nil)
     }
 
+    public func showEmergencyOutageNotification(
+        settings: UserSettings,
+        lang: String,
+        title: String,
+        body: String,
+        outageKey: String
+    ) {
+        guard settings.emergencyNotificationsEnabled else { return }
+        guard !AlertRegistry.shared.hasNotified(slotId: outageKey) else { return }
+        AlertRegistry.shared.markNotified(slotId: outageKey)
+
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = settings.soundEnabled ? .default : nil
+        content.userInfo = [
+            "slotId": outageKey,
+            "queue": settings.queue,
+            "isEmergency": true
+        ]
+        if settings.vibrationEnabled {
+            DispatchQueue.main.async {
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.warning)
+            }
+        }
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.2, repeats: false)
+        let req = UNNotificationRequest(identifier: outageKey, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(req, withCompletionHandler: nil)
+    }
+
     private func buildNotificationContent(
         settings: UserSettings,
         lang: String,

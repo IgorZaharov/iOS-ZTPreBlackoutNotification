@@ -6,7 +6,7 @@ public struct AboutScreen: View {
     public let onOpenRoulette: () -> Void
     @State private var isPrivacyPolicyPresented: Bool = false
 
-    public static let APP_VERSION = "1.3.3"
+    public static let APP_VERSION = "1.3.4"
 
     public init(
         lang: String,
@@ -62,6 +62,7 @@ public struct AboutScreen: View {
                 .frame(maxWidth: .infinity)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 2. App Description Card
                 VStack(alignment: .leading, spacing: 10) {
@@ -87,6 +88,7 @@ public struct AboutScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 3. Developer & GitHub Links Card
                 VStack(alignment: .leading, spacing: 10) {
@@ -163,6 +165,7 @@ public struct AboutScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 4. Charity / Благодійність і Пожертви Section (Opens externally in Safari per Apple Guideline 3.2.1(vi))
                 VStack(alignment: .leading, spacing: 10) {
@@ -191,6 +194,7 @@ public struct AboutScreen: View {
                 .padding(18)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 5. Zhytomyr Roulette Launch Button (right after Donations block)
                 Button(action: onOpenRoulette) {
@@ -201,6 +205,7 @@ public struct AboutScreen: View {
                         .padding(16)
                         .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                         .cornerRadius(24)
+                        .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
                 }
 
                 // 6. Disclaimer Card (Apple Guideline 5.2.2 compliance: independent utility notice)
@@ -221,6 +226,7 @@ public struct AboutScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 7. Privacy Policy Popup Button (bottom of About screen)
                 Button(action: { isPrivacyPolicyPresented = true }) {

@@ -23,7 +23,7 @@ function readBuildVersion(): string {
   } catch {
     // Fallback
   }
-  return '1.3.3';
+  return '1.3.4';
 }
 
 export default defineConfig(() => {
@@ -49,17 +49,17 @@ export default defineConfig(() => {
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
       proxy: {
-        '/proxy-ztoe': {
-          target: 'https://www.ztoe.com.ua',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (p) => p.replace(/^\/proxy-ztoe/, '')
-        },
         '/proxy-ztoe-poweron': {
           target: 'https://api-ztoe-poweron.inneti.net',
           changeOrigin: true,
           secure: false,
           rewrite: (p) => p.replace(/^\/proxy-ztoe-poweron/, '')
+        },
+        '/proxy-ztoe': {
+          target: 'https://www.ztoe.com.ua',
+          changeOrigin: true,
+          secure: false,
+          rewrite: (p) => p.replace(/^\/proxy-ztoe/, '')
         }
       }
     },

@@ -5,6 +5,7 @@
  */
 import { BlackoutSlot, DaySchedule, EmergencyOutageInfo, NotificationRecord, UserSettings } from '../types';
 import { calculateOutageCountdown, DEFAULT_ZTOE_URL } from './ztoeParser';
+import { isValidEmergencyOutage } from './ztoeAddressLookup';
 import { translations } from './i18n';
 
 const SETTINGS_KEY = 'zt_blackout_user_settings_v1';
@@ -25,6 +26,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   refreshIntervalMinutes: 30,
   advanceNoticeMinutes: 15,
   notificationsEnabled: true,
+  emergencyNotificationsEnabled: true,
   soundEnabled: true,
   vibrationEnabled: true,
   prevSoundEnabled: true,
@@ -38,8 +40,15 @@ export function loadUserSettings(): UserSettings {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      const merged: UserSettings = { ...DEFAULT_SETTINGS, ...parsed };
-      if (!merged.notificationsEnabled) {
+      const merged: UserSettings = {
+        ...DEFAULT_SETTINGS,
+        ...parsed,
+        emergencyNotificationsEnabled: parsed.emergencyNotificationsEnabled ?? true,
+        activeEmergencyOutage: isValidEmergencyOutage(parsed.activeEmergencyOutage)
+          ? parsed.activeEmergencyOutage
+          : null
+      };
+      if (!merged.notificationsEnabled && !merged.emergencyNotificationsEnabled) {
         merged.soundEnabled = false;
         merged.vibrationEnabled = false;
       }
@@ -53,10 +62,17 @@ export function loadUserSettings(): UserSettings {
 
 export function saveUserSettings(settings: UserSettings): void {
   try {
+    const anyAlertsEnabled = Boolean(
+      settings.notificationsEnabled || (settings.emergencyNotificationsEnabled ?? true)
+    );
     const normalized: UserSettings = {
       ...settings,
-      soundEnabled: settings.notificationsEnabled ? settings.soundEnabled : false,
-      vibrationEnabled: settings.notificationsEnabled ? settings.vibrationEnabled : false,
+      emergencyNotificationsEnabled: settings.emergencyNotificationsEnabled ?? true,
+      activeEmergencyOutage: isValidEmergencyOutage(settings.activeEmergencyOutage)
+        ? settings.activeEmergencyOutage
+        : null,
+      soundEnabled: anyAlertsEnabled ? settings.soundEnabled : false,
+      vibrationEnabled: anyAlertsEnabled ? settings.vibrationEnabled : false,
       prevSoundEnabled: settings.notificationsEnabled
         ? settings.soundEnabled
         : (settings.prevSoundEnabled ?? true),
@@ -72,7 +88,8 @@ export function saveUserSettings(settings: UserSettings): void {
 
 /**
  * Toggles master notifications ON/OFF:
- * - Turning OFF saves current sound & vibration states and sets both to false (disabled).
+ * - Turning OFF saves current sound & vibration states and sets both to false (disabled)
+ *   without turning off the independent Emergency Outage Notifications switch.
  * - Turning ON restores sound & vibration to their previous states.
  */
 export function toggleMasterNotifications(settings: UserSettings, enabled?: boolean): UserSettings {
@@ -100,6 +117,21 @@ export function toggleMasterNotifications(settings: UserSettings, enabled?: bool
       vibrationEnabled: settings.prevVibrationEnabled ?? true
     };
   }
+}
+
+/**
+ * Toggles Emergency Outage Notifications ON/OFF independently of the regular Notifications switch.
+ */
+export function toggleEmergencyNotifications(
+  settings: UserSettings,
+  enabled?: boolean
+): UserSettings {
+  const current = settings.emergencyNotificationsEnabled ?? true;
+  const targetEnabled = enabled !== undefined ? enabled : !current;
+  return {
+    ...settings,
+    emergencyNotificationsEnabled: targetEnabled
+  };
 }
 
 const memoryNotifiedSlots = new Set<string>();
@@ -287,7 +319,8 @@ export function checkAndTriggerAdvanceAlert(
  * Triggers a state-transition notification for Emergency Outages ("Аварійне відключення"):
  * 1) Fires once when an emergency outage is first detected for the user's selected house upon refresh.
  * 2) Fires once when an active emergency outage is cleared/restored upon refresh.
- * Controlled by the existing Notifications switch (settings.notificationsEnabled).
+ * 3) Fires once if the estimated restoration time changes for an active emergency outage.
+ * Controlled by the dedicated Emergency Outage Notifications switch (settings.emergencyNotificationsEnabled ?? true).
  */
 export function checkAndTriggerEmergencyOutageAlert(
   prevOutage: EmergencyOutageInfo | null | undefined,
@@ -296,15 +329,18 @@ export function checkAndTriggerEmergencyOutageAlert(
   lang: 'uk' | 'en',
   onNotificationFired?: (record: NotificationRecord) => void
 ): NotificationRecord | null {
-  if (!settings.notificationsEnabled) {
+  const emergencySwitchEnabled = settings.emergencyNotificationsEnabled ?? true;
+  if (!emergencySwitchEnabled) {
     return null;
   }
 
+  const validPrev = isValidEmergencyOutage(prevOutage) ? prevOutage : null;
+  const validNext = isValidEmergencyOutage(nextOutage) ? nextOutage : null;
   const notifiedSet = loadNotifiedSlotIds();
 
   // Case 1: Emergency outage detected (transition from none or different outage ID -> active)
-  if (nextOutage && (!prevOutage || prevOutage.id !== nextOutage.id)) {
-    const detectKey = `emerg_detected_${nextOutage.id}`;
+  if (validNext && (!validPrev || validPrev.id !== validNext.id)) {
+    const detectKey = `emerg_detected_${validNext.id}`;
     if (notifiedSet.has(detectKey)) {
       return null;
     }
@@ -312,17 +348,17 @@ export function checkAndTriggerEmergencyOutageAlert(
 
     const title =
       lang === 'uk'
-        ? nextOutage.outageType || 'Аварійне відключення'
+        ? validNext.outageType || 'Аварійне відключення'
         : 'Emergency Outage';
     const timeWindowUk = [
-      nextOutage.startTime ? `Початок: ${nextOutage.startTime}` : '',
-      nextOutage.estimatedRestoreTime ? `Орієнтовне відновлення: ${nextOutage.estimatedRestoreTime}` : '',
+      validNext.startTime ? `Початок: ${validNext.startTime}` : '',
+      validNext.estimatedRestoreTime ? `Орієнтовне відновлення: ${validNext.estimatedRestoreTime}` : '',
     ]
       .filter(Boolean)
       .join(' · ');
     const timeWindowEn = [
-      nextOutage.startTime ? `Start: ${nextOutage.startTime}` : '',
-      nextOutage.estimatedRestoreTime ? `Estimated restore: ${nextOutage.estimatedRestoreTime}` : '',
+      validNext.startTime ? `Start: ${validNext.startTime}` : '',
+      validNext.estimatedRestoreTime ? `Estimated restore: ${validNext.estimatedRestoreTime}` : '',
     ]
       .filter(Boolean)
       .join(' · ');
@@ -344,10 +380,10 @@ export function checkAndTriggerEmergencyOutageAlert(
 
     appendAlertLog(record);
 
-    if (settings.soundEnabled) {
+    if (settings.soundEnabled || (!settings.notificationsEnabled && (settings.prevSoundEnabled ?? true))) {
       playNotificationTone();
     }
-    if (settings.vibrationEnabled) {
+    if (settings.vibrationEnabled || (!settings.notificationsEnabled && (settings.prevVibrationEnabled ?? true))) {
       triggerDeviceVibration();
     }
     if (onNotificationFired) {
@@ -356,9 +392,55 @@ export function checkAndTriggerEmergencyOutageAlert(
     return record;
   }
 
-  // Case 2: Emergency outage restored (transition from active -> none)
-  if (prevOutage && !nextOutage) {
-    const restoreKey = `emerg_restored_${prevOutage.id}`;
+  // Case 2: Active emergency outage restoration time updated
+  if (
+    validPrev &&
+    validNext &&
+    validPrev.id === validNext.id &&
+    validPrev.estimatedRestoreTime !== validNext.estimatedRestoreTime
+  ) {
+    const updateKey = `emerg_updated_${validNext.id}_${validNext.estimatedRestoreTime}`;
+    if (notifiedSet.has(updateKey)) {
+      return null;
+    }
+    markSlotAsNotified(updateKey);
+
+    const title =
+      lang === 'uk'
+        ? 'Оновлено час відновлення (Аварійне відключення)'
+        : 'Emergency Outage Restore Time Updated';
+    const message =
+      lang === 'uk'
+        ? `Орієнтовний час відновлення електропостачання змінено: ${validNext.estimatedRestoreTime}.`
+        : `Estimated power restoration time updated to: ${validNext.estimatedRestoreTime}.`;
+
+    const record: NotificationRecord = {
+      id: `emerg_update_${Date.now()}`,
+      slotId: updateKey,
+      timestamp: Date.now(),
+      title,
+      message,
+      queue: settings.queue || '—',
+      advanceMinutes: 0,
+    };
+
+    appendAlertLog(record);
+
+    if (settings.soundEnabled || (!settings.notificationsEnabled && (settings.prevSoundEnabled ?? true))) {
+      playNotificationTone();
+    }
+    if (settings.vibrationEnabled || (!settings.notificationsEnabled && (settings.prevVibrationEnabled ?? true))) {
+      triggerDeviceVibration();
+    }
+    if (onNotificationFired) {
+      onNotificationFired(record);
+    }
+    return record;
+  }
+
+  // Case 3: Emergency outage restored (transition from active -> none)
+  if (validPrev && !validNext) {
+    const restoreKey = `emerg_restored_${validPrev.id}`;
     if (notifiedSet.has(restoreKey)) {
       return null;
     }
@@ -385,10 +467,10 @@ export function checkAndTriggerEmergencyOutageAlert(
 
     appendAlertLog(record);
 
-    if (settings.soundEnabled) {
+    if (settings.soundEnabled || (!settings.notificationsEnabled && (settings.prevSoundEnabled ?? true))) {
       playNotificationTone();
     }
-    if (settings.vibrationEnabled) {
+    if (settings.vibrationEnabled || (!settings.notificationsEnabled && (settings.prevVibrationEnabled ?? true))) {
       triggerDeviceVibration();
     }
     if (onNotificationFired) {

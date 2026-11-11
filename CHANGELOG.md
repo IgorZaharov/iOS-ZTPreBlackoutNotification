@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.4] - 2026-11-10
+
+### Added
+- **Independent Emergency Outage Notifications Switch (`SettingsView.tsx`, `SettingsScreen.swift`, `alertManager.ts`, `NotificationScheduler.swift`, `SettingsRepository.swift`, `Models.swift`, `types.ts`, `i18n.ts`, `AppStrings.swift`)**:
+  - Added a dedicated `"Сповіщення про аварійні відключення"` / `"Emergency outage notifications"` switch card (`emergencyNotificationsEnabled`, default `true`) in Settings below the regular Notifications card, operating independently of the regular pre-warning notifications toggle.
+- **Zero-Delay `"?"` Address Lookup (`all=1` Bulk Settlement Houses, Persistent Disk Cache & Launch Prefetch) & HTML Entity Decoding (`ztoeAddressLookup.ts`, `ZtoeParser.swift`, `SettingsView.tsx`, `SettingsScreen.swift`, `App.tsx`)**:
+  - Expanded REM catalogue to all 19 ZTOE distribution districts, added bulk settlement-wide house indexing (`all=1`), persistent `localStorage` caching (`zt_address_index_cache_v1`), `50ms` launch prefetch (`prefetchAddressIndexInBackground`), separated Street and House `useEffect` hooks, and `decodeHtmlEntities` / `decodeZtoeHtmlEntities` converting `&amp;#039;`, `&#039;`, `&#39;`, `&#x27;`, `&apos;`, `&rsquo;`, `&lsquo;`, `&#8217;`, `&#146;` into `'`.
+- **Floating Drop Shadows on Main Window Blocks, Symmetrical Emergency Outage Rows & `"?"` Modal Subtitle (`MainView.tsx`, `MainScreen.swift`, `SettingsView.tsx`, `SettingsScreen.swift`)**:
+  - Added pronounced multi-layer floating drop shadows (`shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)]` / `.shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)`) to all card blocks on the Main window, formatted emergency outage Start and Estimated Restore rows symmetrically (`justify-between` / `HStack` with `Spacer()`), and added the subtitle `"(Або закрийте це вікно та виберіть тільки чергу)"` / `"(Or close this window and select directly)"` in the `"?"` dialog.
+- **First Launch Language Switcher (`Auto` / `English` / `Українська`) & Unselected Default Street (`MainView.tsx`, `MainScreen.swift`, `PhoneSimulator.tsx`, `BlackoutAppNavigation.swift`, `SettingsView.tsx`, `SettingsScreen.swift`)**:
+  - Added the `Auto` / `English` / `Українська` language switcher below the `"Виберіть чергу"` / `"Select queue"` button on first application start, automatically navigated to the Main window after the first queue or address is selected, kept Street unselected (`""`) by default on first launch, and fixed queue `5.2` preservation when selecting `м. Житомир, вул. Київська, буд. 77`.
+
 ## [1.3.3] - 2026-11-07
 
 ### Added

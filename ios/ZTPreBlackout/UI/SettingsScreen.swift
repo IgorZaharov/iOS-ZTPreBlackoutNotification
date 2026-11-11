@@ -95,6 +95,7 @@ public struct SettingsScreen: View {
                 .padding(16)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 2. Site URL Card
                 VStack(alignment: .leading, spacing: 10) {
@@ -125,6 +126,7 @@ public struct SettingsScreen: View {
                 .padding(16)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 3. Timers & Notification Switches
                 VStack(alignment: .leading, spacing: 12) {
@@ -195,6 +197,25 @@ public struct SettingsScreen: View {
                 .padding(16)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
+
+                // 3b. Independent Emergency Outage Notifications Switch Card
+                VStack(alignment: .leading, spacing: 10) {
+                    Toggle(AppStrings.settingsEmergencyOutages(lang), isOn: Binding(
+                        get: { settings.emergencyNotificationsEnabled },
+                        set: { enabled in
+                            let updated = SettingsRepository.shared.updateEmergencyNotificationsEnabled(enabled)
+                            onUpdateSettings(updated)
+                        }
+                    ))
+                    .tint(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(.white)
+                }
+                .padding(16)
+                .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
+                .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 4. Language Selector ("Системна", "Українська", "English") using native iOS Segmented Control
                 VStack(alignment: .leading, spacing: 10) {
@@ -219,6 +240,7 @@ public struct SettingsScreen: View {
                 .padding(16)
                 .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
                 .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                 // 5. Action Buttons: Test Alert, Refresh, Reset Defaults
                 VStack(spacing: 10) {
@@ -252,6 +274,10 @@ public struct SettingsScreen: View {
                             .cornerRadius(14)
                     }
                 }
+                .padding(16)
+                .background(Color(red: 0x14 / 255.0, green: 0x1A / 255.0, blue: 0x29 / 255.0).opacity(0.75))
+                .cornerRadius(24)
+                .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 96)
@@ -305,9 +331,14 @@ public struct SettingsScreen: View {
 
                     // 1. Interactive ZTOE Address Queue Lookup (switched to top, expanded internal block border)
                     VStack(alignment: .leading, spacing: 14) {
-                        Text(lang == "en" ? "Find Queue by Address" : "Пошук черги за адресою")
-                            .font(.system(size: 15, weight: .heavy))
-                            .foregroundColor(.white)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(lang == "en" ? "Find Queue by Address" : "Пошук черги за адресою")
+                                .font(.system(size: 15, weight: .heavy))
+                                .foregroundColor(.white)
+                            Text(AppStrings.queueHelpSubtitle(lang))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Color(red: 0xBA / 255.0, green: 0xE6 / 255.0, blue: 0xFD / 255.0).opacity(0.8))
+                        }
 
                         Picker("РЕМ", selection: $selectedRem) {
                             Text("Житомирський РЕМ").tag("Житомирський РЕМ")
@@ -322,9 +353,25 @@ public struct SettingsScreen: View {
                         .background(Color.white.opacity(0.08))
                         .cornerRadius(14)
 
+                        Picker(lang == "en" ? "City / Settlement" : "Населений пункт", selection: $selectedSettlement) {
+                            Text("м. Житомир").tag("м. Житомир")
+                            Text("с. Зарічани").tag("с. Зарічани")
+                            Text("с. Глибочиця").tag("с. Глибочиця")
+                            Text("м. Бердичів").tag("м. Бердичів")
+                            Text("м. Коростень").tag("м. Коростень")
+                            Text("м. Звягель").tag("м. Звягель")
+                        }
+                        .pickerStyle(.menu)
+                        .font(.system(size: 16, weight: .bold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(14)
+
                         Picker(lang == "en" ? "Street" : "Вулиця", selection: $selectedStreet) {
                             Text(lang == "en" ? "Select street" : "Оберіть вулицю").tag("")
                             Text("вул. Київська").tag("вул. Київська")
+                            Text("вул. Степана Бандери").tag("вул. Степана Бандери")
                             Text("вул. Перемоги").tag("вул. Перемоги")
                             Text("вул. Чуднівська").tag("вул. Чуднівська")
                         }
@@ -337,8 +384,10 @@ public struct SettingsScreen: View {
 
                         Picker(lang == "en" ? "House Number" : "Будинок", selection: $selectedHouse) {
                             Text("10").tag("10")
+                            Text("16").tag("16")
                             Text("24").tag("24")
                             Text("37").tag("37")
+                            Text("74").tag("74")
                             Text("77").tag("77")
                             Text("104").tag("104")
                         }
@@ -349,8 +398,15 @@ public struct SettingsScreen: View {
                         .background(Color.white.opacity(0.08))
                         .cornerRadius(14)
 
-                        let foundQueue = selectedHouse == "104" ? "" : (selectedHouse == "77" ? "5.2" : (selectedHouse == "37" ? "2.2" : (selectedHouse == "24" ? "1.2" : "1.1")))
-                        let foundStatusText: String? = selectedHouse == "104"
+                        let isBandery16 = selectedStreet == "вул. Степана Бандери" && (selectedHouse == "16" || selectedHouse == "16/63" || selectedHouse == "16а")
+                        let isKyivska37 = selectedStreet == "вул. Київська" && selectedHouse == "37"
+                        let hasEmergencyOutage = isBandery16 || isKyivska37
+                        let foundQueue = (selectedHouse == "104" || selectedHouse == "74")
+                            ? ""
+                            : (isBandery16
+                                ? "4.1"
+                                : (selectedHouse == "77" ? "5.2" : (selectedHouse == "37" ? "2.2" : (selectedHouse == "24" ? "1.2" : "1.1"))))
+                        let foundStatusText: String? = (selectedHouse == "104" || selectedHouse == "74")
                             ? "В цей час не вимикається, за винятком випадків аварійних відключень"
                             : nil
                         let composedAddress = "\(selectedRem), \(selectedSettlement),\n\(selectedStreet), буд. \(selectedHouse)"
@@ -358,6 +414,21 @@ public struct SettingsScreen: View {
                         Text(composedAddress)
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white.opacity(0.85))
+
+                        if hasEmergencyOutage {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(lang == "en" ? "Emergency Outage" : "Аварійне відключення")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0))
+                                Text(isBandery16 ? "08:31 – 17:00" : "15:16 – 17:00")
+                                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(red: 1.0, green: 0x5E / 255.0, blue: 0x3A / 255.0).opacity(0.12))
+                            .cornerRadius(14)
+                        }
 
                         if let statusText = foundStatusText {
                             Text(statusText)
@@ -400,6 +471,7 @@ public struct SettingsScreen: View {
                         RoundedRectangle(cornerRadius: 24)
                             .stroke(Color.white.opacity(0.25), lineWidth: 2)
                     )
+                    .shadow(color: Color.black.opacity(0.65), radius: 18, x: 0, y: 12)
 
                     // 2. Manual search heading ("Пошук вручну" / "Manual search")
                     Text(lang == "en" ? "Manual search" : "Пошук вручну")

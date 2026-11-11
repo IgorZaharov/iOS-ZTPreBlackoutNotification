@@ -1,6 +1,6 @@
 {
-  "summary":  "Plan to create ANDROID_UPDATE_SPEC.md in the repository root documenting every feature, UI/UX change, algorithm, emergency outage & address lookup flow, battery/performance optimization, and Kotlin/Jetpack Compose/Glance/WorkManager implementation blueprint added since v1.3.3.",
-  "updatedAt":  "2026-11-09T23:00:09.882010620Z",
+  "summary":  "Revised v1.3.4 implementation plan incorporating elevated floating drop shadows on all Main window blocks/cards (in both MainView.tsx and MainScreen.swift), alongside the independent emergencyNotificationsEnabled switch (Card 4b), zero-delay bulk address lookup (all=1) with disk cache and 50ms launch prefetch, HTML entity & apostrophe decoding (&#039; -> '), symmetrical emergency outage rows, \"?\" modal subtitle, and v1.3.4 version bump.",
+  "updatedAt":  "2026-11-10T20:43:33.670895151Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

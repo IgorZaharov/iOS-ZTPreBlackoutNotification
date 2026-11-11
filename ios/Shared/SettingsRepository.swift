@@ -49,12 +49,16 @@ public final class SettingsRepository {
         let selectedSettlement = readSafeString(key: "selected_settlement", defaultValue: "")
         let selectedStreet = readSafeString(key: "selected_street", defaultValue: "")
         let selectedHouse = readSafeString(key: "selected_house", defaultValue: "")
-        let activeEmergencyStart = readSafeString(key: "active_emergency_outage_start", defaultValue: "")
-        let activeEmergencyRestore = readSafeString(key: "active_emergency_outage_restore", defaultValue: "")
+        let rawEmergencyStart = readSafeString(key: "active_emergency_outage_start", defaultValue: "")
+        let rawEmergencyRestore = readSafeString(key: "active_emergency_outage_restore", defaultValue: "")
+        let hasValidEmergency = ZtoeParser.isValidOutageTimestamp(rawEmergencyStart) && ZtoeParser.isValidOutageTimestamp(rawEmergencyRestore)
+        let activeEmergencyStart = hasValidEmergency ? rawEmergencyStart : ""
+        let activeEmergencyRestore = hasValidEmergency ? rawEmergencyRestore : ""
         let url = readSafeString(key: "city_url", defaultValue: AppStrings.DEFAULT_ZTOE_URL)
         let advance = min(240, max(1, readSafeInt(key: "advance_notice_minutes", defaultValue: 15)))
         let refresh = min(240, max(1, readSafeInt(key: "refresh_interval_minutes", defaultValue: 30)))
         let notificationsEnabled = readSafeBoolean(key: "notifications_enabled", defaultValue: true)
+        let emergencyNotificationsEnabled = readSafeBoolean(key: "emergency_notifications_enabled", defaultValue: true)
         let soundEnabled = readSafeBoolean(key: "sound_enabled", defaultValue: true)
         let vibrationEnabled = readSafeBoolean(key: "vibration_enabled", defaultValue: true)
         let language = readSafeString(key: "language", defaultValue: "system")
@@ -74,6 +78,7 @@ public final class SettingsRepository {
             advanceNoticeMinutes: advance,
             refreshIntervalMinutes: refresh,
             notificationsEnabled: notificationsEnabled,
+            emergencyNotificationsEnabled: emergencyNotificationsEnabled,
             soundEnabled: soundEnabled,
             vibrationEnabled: vibrationEnabled,
             language: language,
@@ -82,6 +87,7 @@ public final class SettingsRepository {
     }
 
     public func saveSettings(_ settings: UserSettings) {
+        let hasValidEmergency = ZtoeParser.isValidOutageTimestamp(settings.activeEmergencyOutageStart) && ZtoeParser.isValidOutageTimestamp(settings.activeEmergencyOutageRestore)
         defaults.set(settings.queue, forKey: "queue")
         defaults.set(settings.customQueueStatusText ?? "", forKey: "custom_queue_status_text")
         defaults.set(settings.selectedAddress ?? "", forKey: "selected_address")
@@ -89,12 +95,13 @@ public final class SettingsRepository {
         defaults.set(settings.selectedSettlement ?? "", forKey: "selected_settlement")
         defaults.set(settings.selectedStreet ?? "", forKey: "selected_street")
         defaults.set(settings.selectedHouse ?? "", forKey: "selected_house")
-        defaults.set(settings.activeEmergencyOutageStart ?? "", forKey: "active_emergency_outage_start")
-        defaults.set(settings.activeEmergencyOutageRestore ?? "", forKey: "active_emergency_outage_restore")
+        defaults.set(hasValidEmergency ? (settings.activeEmergencyOutageStart ?? "") : "", forKey: "active_emergency_outage_start")
+        defaults.set(hasValidEmergency ? (settings.activeEmergencyOutageRestore ?? "") : "", forKey: "active_emergency_outage_restore")
         defaults.set(settings.url, forKey: "city_url")
         defaults.set(min(240, max(1, settings.advanceNoticeMinutes)), forKey: "advance_notice_minutes")
         defaults.set(min(240, max(1, settings.refreshIntervalMinutes)), forKey: "refresh_interval_minutes")
         defaults.set(settings.notificationsEnabled, forKey: "notifications_enabled")
+        defaults.set(settings.emergencyNotificationsEnabled, forKey: "emergency_notifications_enabled")
         defaults.set(settings.soundEnabled, forKey: "sound_enabled")
         defaults.set(settings.vibrationEnabled, forKey: "vibration_enabled")
         defaults.set(settings.language, forKey: "language")
@@ -116,6 +123,13 @@ public final class SettingsRepository {
             current.soundEnabled = prevSound
             current.vibrationEnabled = prevVibration
         }
+        saveSettings(current)
+        return current
+    }
+
+    public func updateEmergencyNotificationsEnabled(_ enabled: Bool) -> UserSettings {
+        var current = loadSettings()
+        current.emergencyNotificationsEnabled = enabled
         saveSettings(current)
         return current
     }

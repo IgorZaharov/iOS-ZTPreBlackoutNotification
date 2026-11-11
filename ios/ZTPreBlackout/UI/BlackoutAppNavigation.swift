@@ -163,6 +163,13 @@ public struct BlackoutAppNavigation: View {
                 }
             }
         }
+        .onChange(of: selectedPage) { _, newPage in
+            if newPage == 0 {
+                let currentNow = Date()
+                now = currentNow
+                updateCountdownStatus(at: currentNow)
+            }
+        }
         .task {
             NotificationScheduler.shared.requestAuthorizationIfNeeded()
             reloadLocalSlots()

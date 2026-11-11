@@ -20,7 +20,11 @@ import {
 } from 'lucide-react';
 import { DaySchedule, UserSettings, NotificationRecord, Language } from './types';
 import { applyEmergencyOutageToSchedule, fetchFullSchedules } from './services/ztoeParser';
-import { checkAddressOnZtoeWebsite, getKyivska37DemoEmergencyOutage } from './services/ztoeAddressLookup';
+import {
+  checkAddressOnZtoeWebsite,
+  getKyivska37DemoEmergencyOutage,
+  prefetchAddressIndexInBackground
+} from './services/ztoeAddressLookup';
 import { 
   loadUserSettings, 
   saveUserSettings, 
@@ -149,7 +153,16 @@ export default function App() {
 
   useEffect(() => {
     loadSchedules(settings);
-  }, [loadSchedules, settings.queue, settings.url, settings.selectedAddress]);
+  }, [
+    loadSchedules,
+    settings.queue,
+    settings.url,
+    settings.selectedAddress,
+    settings.selectedAddressQuery?.remId,
+    settings.selectedAddressQuery?.settlementId,
+    settings.selectedAddressQuery?.streetId,
+    settings.selectedAddressQuery?.house
+  ]);
 
   // Periodic background refresh that also re-checks selectedAddressQuery against the ZTOE website
   useEffect(() => {
@@ -165,6 +178,14 @@ export default function App() {
       getDonationsWithDailyRefresh(Date.now(), false).catch(() => {});
     });
   }, []);
+
+  // Pre-fetch and index ZTOE address hierarchy 50ms after launch for zero-delay "?" address lookup
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      prefetchAddressIndexInBackground(settings.url, settings.selectedAddressQuery).catch(() => {});
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [settings.url, settings.selectedAddressQuery]);
 
   // Battery & Power optimization: shared system clock state
   const [now, setNow] = useState<Date>(() => new Date());

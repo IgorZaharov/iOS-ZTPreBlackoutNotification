@@ -21,7 +21,7 @@ import { ZhytomyrRouletteModal } from './ZhytomyrRouletteModal';
 import privacyPolicyMarkdown from '../../PRIVACY_POLICY.md?raw';
 
 declare const __APP_VERSION__: string | undefined;
-const CURRENT_BUILD_VERSION = `v${typeof __APP_VERSION__ !== 'undefined' && /^[0-9]+\.[0-9]+/.test(__APP_VERSION__) ? __APP_VERSION__ : '1.3.3'}`;
+const CURRENT_BUILD_VERSION = `v${typeof __APP_VERSION__ !== 'undefined' && /^[0-9]+\.[0-9]+/.test(__APP_VERSION__) ? __APP_VERSION__ : '1.3.4'}`;
 
 const DonationFavicon: React.FC<{ url: string; title: string }> = ({ url, title }) => {
   const candidates = getFaviconCandidateUrls(url);
@@ -67,7 +67,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
   return (
     <div className="flex flex-col gap-4 max-w-lg mx-auto select-none">
       {/* App Identity Banner */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-6 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col items-center text-center">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-6 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col items-center text-center">
         <div className="w-16 h-16 rounded-2xl bg-[#FF5E3A] flex items-center justify-center text-white shadow-lg mb-3 shadow-[#FF5E3A]/30">
           <Zap className="w-8 h-8 fill-current" />
         </div>
@@ -87,7 +87,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
       </div>
 
       {/* Description Card */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-sky-200/70">
           {lang === 'uk' ? 'Опис застосунку' : 'App Description'}
         </h2>
@@ -100,7 +100,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
       </div>
 
       {/* Developer & GitHub Links */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-sky-200/70">
           {t.aboutLinks}
         </h2>
@@ -179,7 +179,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
       </div>
 
       {/* Donations / Благодійність і Пожертви */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex flex-col gap-3">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex flex-col gap-3">
         <h2 className="text-xs font-bold uppercase tracking-wider text-sky-200/70">
           {t.aboutDonations}
         </h2>
@@ -222,7 +222,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
             setIsRouletteOpen(true);
           }
         }}
-        className="w-full bg-[#141A29]/75 hover:bg-[#1B2338]/85 backdrop-blur-2xl rounded-3xl p-4 border border-amber-300/35 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center justify-center text-sm font-bold text-amber-200 transition-all cursor-pointer active:scale-[0.99]"
+        className="w-full bg-[#141A29]/75 hover:bg-[#1B2338]/85 backdrop-blur-2xl rounded-3xl p-4 border border-amber-300/35 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex items-center justify-center text-sm font-bold text-amber-200 transition-all cursor-pointer active:scale-[0.99]"
       >
         {lang === 'en' ? 'Zhytomyr Roulette' : 'Житомирська Рулетка'}
       </button>
@@ -236,7 +236,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
       )}
 
       {/* Disclaimer */}
-      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center gap-3.5">
+      <div className="bg-[#141A29]/75 backdrop-blur-2xl rounded-3xl p-5 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex items-center gap-3.5">
         <div className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/25">
           <ShieldAlert className="w-5 h-5" />
         </div>
@@ -250,7 +250,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ lang, onOpenRoulette }) =>
         type="button"
         data-testid="open-privacy-policy-btn"
         onClick={() => setIsPrivacyPolicyOpen(true)}
-        className="w-full bg-[#141A29]/75 hover:bg-[#1B2338]/85 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.45)] flex items-center justify-center gap-2.5 text-xs font-bold text-sky-200 hover:text-white transition-all cursor-pointer active:scale-[0.99]"
+        className="w-full bg-[#141A29]/75 hover:bg-[#1B2338]/85 backdrop-blur-2xl rounded-3xl p-4 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.75),0_8px_20px_rgba(0,0,0,0.55)] flex items-center justify-center gap-2.5 text-xs font-bold text-sky-200 hover:text-white transition-all cursor-pointer active:scale-[0.99]"
       >
         <FileText className="w-4 h-4 text-[#FF5E3A]" />
         <span>{lang === 'en' ? 'Privacy Policy' : 'Політика конфіденційності'}</span>

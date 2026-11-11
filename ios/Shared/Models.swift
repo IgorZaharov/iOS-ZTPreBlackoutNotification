@@ -99,6 +99,7 @@ public struct UserSettings: Codable, Equatable {
     public var advanceNoticeMinutes: Int
     public var refreshIntervalMinutes: Int
     public var notificationsEnabled: Bool
+    public var emergencyNotificationsEnabled: Bool
     public var soundEnabled: Bool
     public var vibrationEnabled: Bool
     public var language: String
@@ -118,6 +119,7 @@ public struct UserSettings: Codable, Equatable {
         advanceNoticeMinutes: Int = 15,
         refreshIntervalMinutes: Int = 30,
         notificationsEnabled: Bool = true,
+        emergencyNotificationsEnabled: Bool = true,
         soundEnabled: Bool = true,
         vibrationEnabled: Bool = true,
         language: String = "system",
@@ -136,6 +138,7 @@ public struct UserSettings: Codable, Equatable {
         self.advanceNoticeMinutes = advanceNoticeMinutes
         self.refreshIntervalMinutes = refreshIntervalMinutes
         self.notificationsEnabled = notificationsEnabled
+        self.emergencyNotificationsEnabled = emergencyNotificationsEnabled
         self.soundEnabled = soundEnabled
         self.vibrationEnabled = vibrationEnabled
         self.language = language

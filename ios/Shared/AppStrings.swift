@@ -104,6 +104,18 @@ public enum AppStrings {
         lang == "en" ? "How to find your queue?" : "Як дізнатися свою чергу?"
     }
 
+    public static func queueHelpSubtitle(_ lang: String) -> String {
+        lang == "en"
+            ? "(Or close this window and select directly)"
+            : "(Або закрийте це вікно та виберіть тільки чергу)"
+    }
+
+    public static func settingsEmergencyOutages(_ lang: String) -> String {
+        lang == "en"
+            ? "Emergency outage notifications"
+            : "Сповіщення про аварійні відключення"
+    }
+
     public static func queueHelpConfirm(_ lang: String) -> String {
         lang == "en" ? "Got it" : "Зрозуміло"
     }
